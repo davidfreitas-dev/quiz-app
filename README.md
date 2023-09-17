@@ -1,4 +1,4 @@
-# Auth System with Vue 3 + Firebase
+# Quiz App with Vue 3 + Firebase
 
 This template should help get you started developing with Vue 3 in Vite (Tailwind CSS + ESLint).
 
