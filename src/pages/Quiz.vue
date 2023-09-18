@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useQuizzesStore } from '@/stores/quizzes';
 import { useToast } from '@/use/useToast';
 import { CheckCircleIcon } from '@heroicons/vue/24/solid';
@@ -10,6 +10,7 @@ import Actions from '@/components/Actions.vue';
 import Toast from '@/components/Toast.vue';
 
 const route = useRoute();
+const router = useRouter();
 
 const quizzesStore = useQuizzesStore();
 
@@ -84,6 +85,7 @@ const nextQuestion = () => {
   } else {
     checkAnswers();
     console.log(score.value);
+    router.push('/result');
   }
 };
 

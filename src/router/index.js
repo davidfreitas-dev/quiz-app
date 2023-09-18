@@ -13,6 +13,11 @@ const router = createRouter({
       name: 'quiz',
       component: () => import('../pages/Quiz.vue')
     },
+    {
+      path: '/result',
+      name: 'result',
+      component: () => import('../pages/Result.vue')
+    },
   ]
 });
 
