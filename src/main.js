@@ -3,6 +3,8 @@ import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
 
+import './services/firebase-firestore';
+
 import './style.css';
 
 const pinia = createPinia();

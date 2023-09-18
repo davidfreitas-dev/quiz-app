@@ -46,7 +46,7 @@ const updateValue = (event) => {
     />
 
     <input
-      className="bg-transparent flex-1 text-gray-100 text-sm font-medium placeholder:text-gray-400 outline-none"
+      className="bg-transparent flex-1 text-primary-font text-sm font-medium placeholder:text-gray-400 outline-none"
       :type="type"
       :value="modelValue"
       :placeholder="text"
