@@ -25,7 +25,7 @@ const props = defineProps({
       'font-bold': weight === 'bold',
       'font-semibold': weight === 'semibold',
     }"
-    class="text-font font-sans leading-tight"
+    class="text-font font-sans leading-tight select-none"
   >
     {{ text }}
   </span>
