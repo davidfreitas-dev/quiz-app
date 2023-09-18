@@ -8,6 +8,16 @@ const router = createRouter({
       name: 'signup',
       component: () => import('../pages/auth/SignUp.vue') 
     },
+    { 
+      path: '/signin', 
+      name: 'signin',
+      component: () => import('../pages/auth/SignIn.vue') 
+    },
+    { 
+      path: '/forgot', 
+      name: 'forgot',
+      component: () => import('../pages/auth/Forgot.vue') 
+    },
     {
       path: '/',
       name: 'home',
@@ -23,7 +33,11 @@ const router = createRouter({
       name: 'result',
       component: () => import('../pages/Result.vue')
     },
-  ]
+  ],
+  scrollBehavior(to, from, savedPosition) {
+    // always scroll to top
+    return { top: 0 };
+  },
 });
 
 export default router;

@@ -13,25 +13,20 @@ import Toast from '@/components/Toast.vue';
 
 const router = useRouter();
 
+const isLoading = ref(false);
+
 const formData = reactive({
-  name: '',
   email: '',
   password: ''
 });
 
-const isLoading = ref(false);
-
-const register = async () => {
+const login = async () => {
   isLoading.value = true;
 
-  const response = await signUp(formData);
+  const response = await signIn(formData);
 
   if (response.status == 'success') {
-    handleToast(response.status, 'Cadastro efetuado com sucesso!');
-    
-    setTimeout(() => {
-      router.push('/signin');
-    }, 1500);
+    router.push('/');
   } else {
     handleException(response.code);
     handleToast(response.status, exception);
@@ -43,15 +38,15 @@ const register = async () => {
 const validateForm = (event) => {
   event.preventDefault();
 
-  if (!formData.name || !formData.email || !formData.password) {
-    handleToast('error', 'Preencha todos os campos.');
+  if (!formData.email || !formData.password) {
+    handleToast('error', 'Informe seu e-mail e senha.');
     return;
-  } 
-  
-  register();
+  }  
+
+  login();
 };
 
-const { signUp } = useAuth();
+const { signIn } = useAuth();
 const { handleException, exception } = useException();
 const { toast, toastData, handleToast } = useToast();
 </script>
@@ -67,7 +62,7 @@ const { toast, toastData, handleToast } = useToast();
 
       <Text 
         size="md"
-        text="Cadastre-se e participe agora mesmo!"
+        text="Entre e participe agora mesmo!"
         class="mt-1"
       />
     </header>
@@ -77,20 +72,10 @@ const { toast, toastData, handleToast } = useToast();
       class="flex flex-col gap-4 items-stretch w-full max-w-sm mt-10"
     >
       <div class="flex flex-col gap-3">
-        <label class="font-semibold">
-          Nome e sobrenome
-        </label>
-
-        <TextInput
-          v-model="formData.name"
-          type="text"
-          icon="UserIcon"
-          text="Fulano de Tal"
-        />
-      </div>
-
-      <div class="flex flex-col gap-3">
-        <label class="font-semibold">
+        <label
+          class="font-semibold"
+          for="lblEmail"
+        >
           Endereço de e-mail
         </label>
 
@@ -98,12 +83,15 @@ const { toast, toastData, handleToast } = useToast();
           v-model="formData.email"
           type="email"
           icon="EnvelopeIcon"
-          text="fulano@email.com"
+          text="johndoe@email.com"
         />
       </div>
 
       <div class="flex flex-col gap-3">
-        <label class="font-semibold">
+        <label
+          class="font-semibold"
+          for="lblPassword"
+        >
           Sua senha
         </label>
 
@@ -117,7 +105,7 @@ const { toast, toastData, handleToast } = useToast();
       </div>
 
       <Button
-        text="Cadastrar na plataforma"
+        text="Entrar na plataforma"
         :is-loading="isLoading"
         class="mt-4"
       />
@@ -125,26 +113,26 @@ const { toast, toastData, handleToast } = useToast();
       <GoogleButton />
     </form>
 
-    <footer class="flex flex-col items-center gap-4 mt-8">
+    <footer class="flex flex-col items-center gap-4 my-8">
       <router-link to="/forgot">
         <Text
-          :size="'sm'"
-          :text="'Esqueceu sua senha?'"
-          class="text-primary cursor-pointer hover:text-brand-hover hover:underline"
+          size="sm"
+          text="Esqueceu sua senha?"
+          class="text-gray-400 cursor-pointer hover:text-brand-hover hover:underline"
         />
       </router-link>
 
-      <router-link to="/signin">
+      <router-link to="/signup">
         <Text
           size="sm"
-          text="Já possui conta?"
-          class="text-primary cursor-pointer hover:text-gray-200"
+          text="Não possui conta?"
+          class="text-gray-400 cursor-pointer hover:text-gray-200"
         />
 
         <Text
           size="sm"
-          text=" Entre agora!"
-          class="text-primary cursor-pointer hover:text-brand-hover hover:underline"
+          text=" Crie uma agora!"
+          class="text-gray-400 cursor-pointer hover:text-brand-hover hover:underline"
         />
       </router-link>
     </footer>
