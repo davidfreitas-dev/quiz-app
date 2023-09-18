@@ -2,10 +2,12 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useQuizzesStore } from '@/stores/quizzes';
+import { useToast } from '@/use/useToast';
 import { CheckCircleIcon } from '@heroicons/vue/24/solid';
 import Progressbar from '@/components/Progressbar.vue';
 import Text from '@/components/Text.vue';
 import Actions from '@/components/Actions.vue';
+import Toast from '@/components/Toast.vue';
 
 const route = useRoute();
 
@@ -73,7 +75,7 @@ const nextQuestion = () => {
   const hasSelectedOption = currentQuestion.options.some(option => option.selected);
 
   if (!hasSelectedOption) {
-    console.log('Selecione uma opção antes de continuar');
+    handleToast('error', 'Selecione uma opção antes de continuar');
     return;
   }
 
@@ -90,22 +92,29 @@ const progress = computed(() => {
 
   return (100 / questionsCount) * (currentQuestionIndex.value + 1);
 });
+
+const { toast, toastData, handleToast } = useToast();
 </script>
 
 <template>
   <div
     v-if="quiz"
-    class="quiz-container flex flex-col items-start gap-5 w-full min-h-screen p-7"
+    class="quiz-container flex flex-col items-start w-full min-h-screen p-7"
   >
     <Text
+      class="mb-5"
       size="sm"
       weight="semibold"
       :text="`Prova ${quiz.id} - Questão ${quiz.questions[currentQuestionIndex].id} de ${quiz.questions.length}`"
     />
 
-    <Progressbar :progress="progress" />
+    <Progressbar
+      class="mb-5"
+      :progress="progress"
+    />
 
     <Text
+      class="mb-5"
       size="lg"
       weight="bold"
       :text="quiz.questions[currentQuestionIndex].question"
@@ -142,6 +151,11 @@ const progress = computed(() => {
       :is-last-question="isLastQuestion"
       @on-handle-continue="nextQuestion"
       @on-handle-back="previousQuestion"
+    />
+
+    <Toast
+      ref="toast"
+      :toast-data="toastData"
     />
   </div>
 </template>

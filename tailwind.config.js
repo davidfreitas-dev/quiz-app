@@ -16,7 +16,6 @@ export default {
       secondary: '#9ea0b2',
       light: '#f7f8fc',
       success: '#61cdb9',
-      danger: '#ea55de',
       font: '#444865'
     }
   },
