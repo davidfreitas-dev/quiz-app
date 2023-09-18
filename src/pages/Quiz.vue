@@ -5,6 +5,7 @@ import { useQuizzesStore } from '@/stores/quizzes';
 import { useToast } from '@/use/useToast';
 import { CheckCircleIcon } from '@heroicons/vue/24/solid';
 import Progressbar from '@/components/Progressbar.vue';
+import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
 import Actions from '@/components/Actions.vue';
 import Toast from '@/components/Toast.vue';
@@ -115,9 +116,9 @@ const { toast, toastData, handleToast } = useToast();
       :progress="progress"
     />
 
-    <Text
+    <Heading
       class="mb-5"
-      size="lg"
+      size="md"
       weight="bold"
       :text="quiz.questions[currentQuestionIndex].question"
     />
@@ -129,7 +130,7 @@ const { toast, toastData, handleToast } = useToast();
       >
         <div
           class="option flex items-center gap-2 px-5 w-full h-14 rounded-2xl transition-colors"
-          :class="[ item.selected ? 'text-primary bg-primary-light' : 'text-font bg-light' ]"
+          :class="[ item.selected ? 'text-primary bg-primary-light' : 'text-primary-font bg-light' ]"
           @click="selectOption(index)"
         >
           <CheckCircleIcon
@@ -139,7 +140,7 @@ const { toast, toastData, handleToast } = useToast();
 
           <span
             v-else
-            class="h-5 w-5 mr-1 border-2 border-gray-200 rounded-full"
+            class="h-5 w-5 mr-1 border-2 border-secondary-font rounded-full"
           />
 
           <label class="ml-2 text-sm font-semibold">

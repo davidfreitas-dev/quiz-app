@@ -4,7 +4,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { ChevronRightIcon } from '@heroicons/vue/24/solid';
 import { useQuizzesStore } from '@/stores/quizzes';
 import { db } from '@/services/firebase-firestore';
-import Text from '@/components/Text.vue';
+import Heading from '@/components/Heading.vue';
 
 const quizzesStore = useQuizzesStore();
 
@@ -33,9 +33,8 @@ onMounted(async () => {
 
 <template>
   <div class="flex flex-col items-start gap-5 w-full min-h-screen p-7">
-    <Text
-      size="lg"
-      weight="bold"
+    <Heading
+      size="md"
       text="Selecione a prova que deseja fazer para iniciar o teste."
     />
 
@@ -44,7 +43,7 @@ onMounted(async () => {
         v-for="(quiz, index) in quizzes"
         :key="index"
         :to="`/quiz/${quiz.id}`"
-        class="quiz flex items-center justify-between gap-2 p-5 w-full text-font rounded-2xl bg-light cursor-pointer"
+        class="quiz flex items-center justify-between gap-2 p-5 w-full text-primary-font rounded-2xl bg-light cursor-pointer"
       >
         <label class="ml-2 text-sm font-semibold">
           Prova {{ quiz.id }}
