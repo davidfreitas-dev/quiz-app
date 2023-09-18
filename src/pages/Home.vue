@@ -1,42 +1,32 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { collection, getDocs } from 'firebase/firestore';
 import { ChevronRightIcon } from '@heroicons/vue/24/solid';
 import { useQuizzesStore } from '@/stores/quizzes';
+import { db } from '@/services/firebase-firestore';
 import Text from '@/components/Text.vue';
 
 const quizzesStore = useQuizzesStore();
 
-const quizzes = ref([
-  {
-    id: 1,
-    questions: [
-      {
-        id: 1,
-        question: 'Qual é a capital da França?', 
-        options: [
-          { option: 'A', desc: 'Londres', selected: false }, 
-          { option: 'B', desc: 'Paris', selected: false }, 
-          { option: 'C', desc: 'Berlim', selected: false }, 
-          { option: 'D', desc: 'Madrid', selected: false }
-        ], 
-        answer: 'B'
-      },
-      { 
-        id: 2,
-        question: 'Quem escreveu "Romeu e Julieta"?',
-        options: [
-          { option: 'A', desc: 'Charles Dickens', selected: false }, 
-          { option: 'B', desc: 'Jane Austen', selected: false }, 
-          { option: 'C', desc: 'Leo Tolstoy', selected: false }, 
-          { option: 'D', desc: 'William Shakespeare', selected: false }
-        ], 
-        answer: 'D'
-      }
-    ]
-  }
-]);
+const quizzes = ref([]);
 
-onMounted(() => {
+const loadQuizzes = async () => {
+  let data = [];
+
+  const querySnapshot = await getDocs(collection(db, 'quizzes'));
+
+  querySnapshot.forEach((doc) => {
+    data.push({
+      ...{ id: doc.id },
+      ...doc.data()
+    });
+  });
+
+  quizzes.value = data;
+};
+
+onMounted(async () => {
+  await loadQuizzes();
   quizzesStore.setQuizzes(quizzes.value);
 });
 </script>
