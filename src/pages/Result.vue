@@ -1,21 +1,31 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/services/firebase-firestore';
+import { useRoute, useRouter } from 'vue-router';
 import Button from '@/components/Button.vue';
 
+const route = useRoute();
 const router = useRouter();
+const quiz = ref(null);
 
-const count = ref(10);
+onMounted(async () => {
+  const userId = localStorage.getItem('bdb.userId');
+  const docSnap = await getDoc(doc(db, 'users', userId));  
+  const user = docSnap.exists() ? docSnap.data() : null;
+
+  quiz.value = user.quizzes.find(quiz => quiz.id === Number(route.params.id));
+});
 
 const message = computed(() => {
   switch (true) {
-  case count.value >= 0 && count.value <= 4:
+  case quiz.value.score >= 0 && quiz.value.score <= 4:
     return 'Que pena...';
-  case count.value >= 5 && count.value <= 8:
+  case quiz.value.score >= 5 && quiz.value.score <= 8:
     return 'É isso aí!';
-  case count.value == 9:
+  case quiz.value.score == 9:
     return 'Muito bem!';
-  case count.value == 10:
+  case quiz.value.score == 10:
     return 'Parabéns';
   default:
     return 'Nota não especificada nos intervalos.';
@@ -24,13 +34,13 @@ const message = computed(() => {
 
 const emoji = computed(() => {
   switch (true) {
-  case count.value >= 0 && count.value <= 4:
+  case quiz.value.score >= 0 && quiz.value.score <= 4:
     return '😕';
-  case count.value >= 5 && count.value <= 8:
+  case quiz.value.score >= 5 && quiz.value.score <= 8:
     return '😊';
-  case count.value == 9:
+  case quiz.value.score == 9:
     return '🤩';
-  case count.value == 10:
+  case quiz.value.score == 10:
     return '🥳';
   default:
     return 'Nota não especificada nos intervalos.';
@@ -39,13 +49,16 @@ const emoji = computed(() => {
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-3 p-7 min-h-screen">
+  <div
+    v-if="quiz"
+    class="flex flex-col items-center gap-3 p-7 min-h-screen"
+  >
     <div class="text-9xl mt-10">
       {{ emoji }}
     </div>
 
     <div class="flex-1 text-5xl text-center font-extrabold leading-tight">
-      {{ message }} Você tirou <span class="text-success">Nota {{ count }}</span>
+      {{ message }} Você tirou <span class="text-success">Nota {{ quiz.score }}</span>
     </div>
 
     <Button

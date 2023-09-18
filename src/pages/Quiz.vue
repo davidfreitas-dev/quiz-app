@@ -103,7 +103,7 @@ const nextQuestion = async () => {
   } else {
     await checkAnswers();
     await saveData();
-    router.push('/result');
+    router.push(`/result/${quiz.value.id}`);
   }
 };
 

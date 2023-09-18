@@ -36,7 +36,7 @@ const router = createRouter({
       }
     },
     {
-      path: '/result',
+      path: '/result/:id',
       name: 'result',
       component: () => import('../pages/Result.vue'),
       meta: {
