@@ -9,7 +9,7 @@ const router = createRouter({
       component: () => import('../pages/Home.vue')
     },
     {
-      path: '/quiz',
+      path: '/quiz/:id',
       name: 'quiz',
       component: () => import('../pages/Quiz.vue')
     },

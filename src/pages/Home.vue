@@ -1,10 +1,10 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
 import { ChevronRightIcon } from '@heroicons/vue/24/solid';
+import { useQuizzesStore } from '@/stores/quizzes';
 import Text from '@/components/Text.vue';
 
-const router = useRouter();
+const quizzesStore = useQuizzesStore();
 
 const quizzes = ref([
   {
@@ -14,10 +14,10 @@ const quizzes = ref([
         id: 1,
         question: 'Qual é a capital da França?', 
         options: [
-          { A: 'Londres', selected: false }, 
-          { B: 'Paris', selected: false }, 
-          { C: 'Berlim', selected: false }, 
-          { D: 'Madrid', selected: false }
+          { option: 'A', desc: 'Londres', selected: false }, 
+          { option: 'B', desc: 'Paris', selected: false }, 
+          { option: 'C', desc: 'Berlim', selected: false }, 
+          { option: 'D', desc: 'Madrid', selected: false }
         ], 
         answer: 'B'
       },
@@ -25,16 +25,20 @@ const quizzes = ref([
         id: 2,
         question: 'Quem escreveu "Romeu e Julieta"?',
         options: [
-          { A: 'Charles Dickens', selected: false }, 
-          { B: 'Jane Austen', selected: false }, 
-          { C: 'Leo Tolstoy', selected: false }, 
-          { D: 'William Shakespeare', selected: false }
+          { option: 'A', desc: 'Charles Dickens', selected: false }, 
+          { option: 'B', desc: 'Jane Austen', selected: false }, 
+          { option: 'C', desc: 'Leo Tolstoy', selected: false }, 
+          { option: 'D', desc: 'William Shakespeare', selected: false }
         ], 
         answer: 'D'
       }
     ]
   }
 ]);
+
+onMounted(() => {
+  quizzesStore.setQuizzes(quizzes.value);
+});
 </script>
 
 <template>
@@ -46,16 +50,18 @@ const quizzes = ref([
     />
 
     <div class="quizzes flex flex-1 flex-col items-start w-full gap-3">
-      <div
+      <router-link
         v-for="(quiz, index) in quizzes"
         :key="index"
+        :to="`/quiz/${quiz.id}`"
         class="quiz flex items-center justify-between gap-2 p-5 w-full text-font rounded-2xl bg-light cursor-pointer"
       >
         <label class="ml-2 text-sm font-semibold">
           Prova {{ quiz.id }}
         </label>
+        
         <ChevronRightIcon class="h-5 w-5" />
-      </div>
+      </router-link>
     </div>
   </div>
 </template>
