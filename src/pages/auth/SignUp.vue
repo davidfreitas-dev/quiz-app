@@ -1,5 +1,7 @@
 <script setup>
 import { ref, reactive } from 'vue';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '@/services/firebase-firestore';
 import { useAuth } from '@/use/useAuth';
 import { useException } from '@/use/useException';
 import { useToast } from '@/use/useToast';
@@ -19,6 +21,12 @@ const formData = reactive({
   password: ''
 });
 
+const saveData = async (userData) => {
+  const usersRef = doc(db, 'users', userData.id);
+
+  await setDoc(usersRef, userData);
+};
+
 const isLoading = ref(false);
 
 const register = async () => {
@@ -28,12 +36,19 @@ const register = async () => {
 
   if (response.status == 'success') {
     handleToast(response.status, 'Cadastro efetuado com sucesso!');
-    
+
+    saveData({
+      id: response.data.uid,
+      email: response.data.email,
+      name: formData.name,
+    });
+
     setTimeout(() => {
-      router.push('/signin');
+      router.push('/');
     }, 1500);
   } else {
     handleException(response.code);
+    
     handleToast(response.status, exception);
   }
 
@@ -57,8 +72,8 @@ const { toast, toastData, handleToast } = useToast();
 </script>
 
 <template>
-  <div class="flex flex-col w-full text-primary-font p-7">
-    <header class="flex flex-col items-start">
+  <div class="flex flex-col items-center w-full min-h-screen text-primary-font p-7">
+    <header class="flex flex-col items-start w-full">
       <Heading
         size="lg"
         text="Bem-vindo 👋"
@@ -74,7 +89,7 @@ const { toast, toastData, handleToast } = useToast();
 
     <form
       @submit="validateForm"
-      class="flex flex-col gap-4 items-stretch w-full max-w-sm mt-10"
+      class="flex flex-col gap-4 items-stretch w-full mt-10"
     >
       <div class="flex flex-col gap-3">
         <label class="font-semibold">

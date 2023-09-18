@@ -52,8 +52,8 @@ const { toast, toastData, handleToast } = useToast();
 </script>
 
 <template>
-  <div class="flex flex-col w-full text-primary-font p-7">
-    <header class="flex flex-col items-start">
+  <div class="flex flex-col items-center w-full min-h-screen text-primary-font p-7">
+    <header class="flex flex-col items-start w-full">
       <Heading
         size="lg"
         text="Bem-vindo 👋"
@@ -69,7 +69,7 @@ const { toast, toastData, handleToast } = useToast();
 
     <form
       @submit="validateForm"
-      class="flex flex-col gap-4 items-stretch w-full max-w-sm mt-10"
+      class="flex flex-col gap-4 items-stretch w-full mt-10"
     >
       <div class="flex flex-col gap-3">
         <label
