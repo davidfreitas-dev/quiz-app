@@ -35,17 +35,14 @@ const register = async () => {
   const response = await signUp(formData);
 
   if (response.status == 'success') {
-    handleToast(response.status, 'Cadastro efetuado com sucesso!');
-
     saveData({
       id: response.data.uid,
       email: response.data.email,
       name: formData.name,
+      quizzes: []
     });
 
-    setTimeout(() => {
-      router.push('/');
-    }, 1500);
+    router.push('/');
   } else {
     handleException(response.code);
     

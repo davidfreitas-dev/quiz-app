@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '@/services/firebase-firestore';
 import { useQuizzesStore } from '@/stores/quizzes';
 import { useToast } from '@/use/useToast';
 import { CheckCircleIcon } from '@heroicons/vue/24/solid';
@@ -12,7 +14,6 @@ import Toast from '@/components/Toast.vue';
 
 const route = useRoute();
 const router = useRouter();
-
 const quizzesStore = useQuizzesStore();
 
 const quiz = ref(undefined);
@@ -43,7 +44,7 @@ const score = ref(0);
 
 const userAnswers = ref([]);
 
-const checkAnswers = () => {
+const checkAnswers = async () => {
   quiz.value.questions.forEach(question => {
     question.options.forEach(option => {
       if (option.selected) {
@@ -61,6 +62,22 @@ const checkAnswers = () => {
   });
 };
 
+const saveData = async () => {
+  const userId = localStorage.getItem('bdb.userId');
+  const docSnap = await getDoc(doc(db, 'users', userId));  
+  const userData = docSnap.exists() ? docSnap.data() : null;
+
+  userData.quizzes.push({
+    id: quiz.value.id,
+    answers: userAnswers.value,
+    score: score.value
+  });
+
+  await updateDoc(doc(db, 'users', userId), {
+    quizzes: userData.quizzes
+  });
+};
+
 const previousQuestion = () => {
   if (currentQuestionIndex.value > 0) {
     currentQuestionIndex.value--;
@@ -71,7 +88,7 @@ const isLastQuestion = computed(() => {
   return currentQuestionIndex.value === quiz.value.questions.length - 1;
 });
 
-const nextQuestion = () => {
+const nextQuestion = async () => {
   const currentQuestion = quiz.value.questions[currentQuestionIndex.value];
 
   const hasSelectedOption = currentQuestion.options.some(option => option.selected);
@@ -84,8 +101,8 @@ const nextQuestion = () => {
   if (!isLastQuestion.value) {
     currentQuestionIndex.value++;
   } else {
-    checkAnswers();
-    console.log(score.value);
+    await checkAnswers();
+    await saveData();
     router.push('/result');
   }
 };

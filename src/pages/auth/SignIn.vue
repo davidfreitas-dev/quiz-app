@@ -26,9 +26,12 @@ const login = async () => {
   const response = await signIn(formData);
 
   if (response.status == 'success') {
+    localStorage.setItem('bdb.userId', response.data.uid);
+
     router.push('/');
   } else {
     handleException(response.code);
+    
     handleToast(response.status, exception);
   }
 
