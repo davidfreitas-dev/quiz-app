@@ -83,7 +83,7 @@ const { toast, toastData, handleToast } = useToast();
 
       <Button
         text="Enviar link de recuperação"
-        is-loading="isLoading"
+        :is-loading="isLoading"
         class="mt-4"
       />
     </form>
