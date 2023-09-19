@@ -18,18 +18,12 @@ const loadUsers = async () => {
     });
   });
 
-  users.value = data;
+  users.value = data.sort((a, b) => b.score - a.score);
 };
 
 onMounted(async () => {
   await loadUsers();
 });
-
-const totalScore = (quizzes) =>{
-  return quizzes
-    .map(quiz => quiz.score * 1)
-    .reduce((total, current) => total + current, 0);
-};
 </script>
 
 <template>
@@ -85,7 +79,7 @@ const totalScore = (quizzes) =>{
               align="right"
               class="p-4"
             >
-              {{ totalScore(user.quizzes) }}
+              {{ user.score }}
             </td>
           </tr>
         </tbody>

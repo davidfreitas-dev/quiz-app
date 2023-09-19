@@ -38,7 +38,8 @@ const signInWithGoogle = (response) => {
     id: response.data.uid,
     email: response.data.email,
     name: formData.name || response.data.email,
-    quizzes: []
+    quizzes: [],
+    score: 0
   });
 
   router.push('/');
@@ -52,11 +53,14 @@ const register = async () => {
   const response = await signUp(formData);
 
   if (response.status == 'success') {
+    localStorage.setItem('bdb.userId', response.data.uid);
+    
     saveData({
       id: response.data.uid,
       email: response.data.email,
       name: formData.name,
-      quizzes: []
+      quizzes: [],
+      score: 0
     });
 
     router.push('/');

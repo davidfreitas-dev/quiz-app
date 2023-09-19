@@ -73,8 +73,13 @@ const saveData = async () => {
     score: score.value
   });
 
+  const totalScore = userData.quizzes
+    .map(quiz => quiz.score * 1)
+    .reduce((total, current) => total + current, 0);
+
   await updateDoc(doc(db, 'users', userId), {
-    quizzes: userData.quizzes
+    quizzes: userData.quizzes,
+    score: totalScore
   });
 };
 
