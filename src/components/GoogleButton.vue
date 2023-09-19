@@ -1,19 +1,25 @@
 <script setup>
-import { useRouter } from 'vue-router';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
-const router = useRouter();
+const emit = defineEmits(['onGoogleAuth']);
 
 const signInWithGoogle = () => {
   const provider = new GoogleAuthProvider();    
 
   signInWithPopup(getAuth(), provider)
     .then((result) => {
-      console.log(result.user);
-      router.push('/');
+      emit('onGoogleAuth', {
+        status: 'success',
+        message: 'Logado com sucesso!',
+        data: result.user
+      });
     })
     .catch((err) => {
-      console.log(err);
+      emit('onGoogleAuth', {
+        code: err.code,
+        status: 'error',
+        message: err.message
+      });
     });
 };
 </script>
@@ -26,9 +32,9 @@ const signInWithGoogle = () => {
   </div>
 
   <button
-    @click="signInWithGoogle"
     type="button"
     class="flex flex-row justify-center items-center gap-2 cursor-pointer py-3 px-4 shadow-lg border border-light bg-white rounded-xl font-semibold text-black text-sm w-full h-12 transition-colors"
+    @click="signInWithGoogle"
   >
     <img
       src="@/assets/google.svg"

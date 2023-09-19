@@ -27,6 +27,23 @@ const saveData = async (userData) => {
   await setDoc(usersRef, userData);
 };
 
+const signInWithGoogle = (response) => {
+  if (response.status != 'success') {
+    handleException(response.code);    
+    handleToast(response.status, exception);
+    return;
+  }
+
+  saveData({
+    id: response.data.uid,
+    email: response.data.email,
+    name: formData.name || response.data.email,
+    quizzes: []
+  });
+
+  router.push('/');
+};
+
 const isLoading = ref(false);
 
 const register = async () => {
@@ -134,7 +151,7 @@ const { toast, toastData, handleToast } = useToast();
         class="mt-4"
       />
 
-      <GoogleButton />
+      <GoogleButton @on-google-auth="signInWithGoogle" />
     </form>
 
     <footer class="flex flex-col items-center gap-4 mt-8">

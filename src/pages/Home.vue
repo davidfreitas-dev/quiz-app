@@ -66,7 +66,7 @@ const selectQuiz = (quiz) => {
   <div class="flex flex-col items-start gap-5 w-full min-h-screen p-7">
     <Heading
       size="md"
-      text="Selecione a prova que deseja fazer para iniciar o teste."
+      text="Selecione a prova que deseja iniciar."
     />
 
     <div class="quizzes flex flex-1 flex-col items-start w-full gap-3">
@@ -77,7 +77,7 @@ const selectQuiz = (quiz) => {
         @click="selectQuiz(quiz)"
       >
         <label class="ml-2 text-sm font-semibold">
-          Prova {{ quiz.id }} <span v-if="quiz.score >= 0">({{ quiz.score }})</span>
+          Prova {{ quiz.id }} <span v-if="quiz.score >= 0"> ({{ quiz.score }} Pontos)</span>
         </label>
 
         <span
