@@ -76,7 +76,7 @@ const selectQuiz = (quiz) => {
         class="quiz flex items-center justify-between gap-2 p-5 w-full text-primary-font rounded-2xl bg-light cursor-pointer"
         @click="selectQuiz(quiz)"
       >
-        <label class="ml-2 text-sm font-semibold">
+        <label class="text-sm font-semibold">
           Prova {{ quiz.id }} <span v-if="quiz.score >= 0"> ({{ quiz.score }} Pontos)</span>
         </label>
 

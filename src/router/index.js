@@ -43,6 +43,14 @@ const router = createRouter({
         requiresAuth: true
       }
     },
+    {
+      path: '/ranking',
+      name: 'ranking',
+      component: () => import('../pages/Ranking.vue'),
+      meta: {
+        requiresAuth: true
+      }
+    },
   ],
   scrollBehavior(to, from, savedPosition) {
     // always scroll to top
