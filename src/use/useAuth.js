@@ -1,4 +1,4 @@
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from 'firebase/auth';
 
 export function useAuth() {
   const signIn = async (payload) => {
@@ -72,9 +72,33 @@ export function useAuth() {
     return result;
   };
 
+  const logOut = async () => {
+    let result;
+
+    const auth = getAuth();
+
+    await signOut(auth)
+      .then((res) => {
+        result = {
+          status: 'success',
+          message: 'Logout efetuado com sucesso!'
+        };
+      })
+      .catch((err) => {
+        result = {
+          code: err.code,
+          status: 'error',
+          message: err.message
+        };
+      });
+
+    return result;
+  };
+
   return {
     signUp,
     signIn,
-    passwordReset
+    passwordReset,
+    logOut
   };
 }

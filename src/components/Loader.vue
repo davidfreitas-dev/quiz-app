@@ -17,7 +17,7 @@
   width: 10px;
   height: 10px;
   margin: 0 3px;
-  background: #222222;
+  background: #fff;
   border-radius: 100%;
   display: inline-block;
   animation: sk-bouncedelay 1.3s infinite ease-in-out both;

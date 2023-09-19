@@ -168,9 +168,10 @@ const { toast, toastData, handleToast } = useToast();
     </div>
 
     <Actions
-      :is-last-question="isLastQuestion"
-      @on-handle-continue="nextQuestion"
-      @on-handle-back="previousQuestion"
+      text-left="Anterior"
+      :text-right="isLastQuestion ? 'Finalizar' : 'Próxima'"
+      @on-handle-left="previousQuestion"
+      @on-handle-right="nextQuestion"
     />
 
     <Toast

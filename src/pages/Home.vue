@@ -2,11 +2,12 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { collection, getDocs, getDoc, doc } from 'firebase/firestore';
+import { db } from '@/services/firebase-firestore';
 import { ChevronRightIcon } from '@heroicons/vue/24/solid';
 import { useQuizzesStore } from '@/stores/quizzes';
-import { db } from '@/services/firebase-firestore';
+import { useAuth } from '@/use/useAuth';
 import Heading from '@/components/Heading.vue';
-import Button from '@/components/Button.vue';
+import Actions from '@/components/Actions.vue';
 
 const user = ref(undefined);
 
@@ -60,6 +61,16 @@ const selectQuiz = (quiz) => {
   
   router.push(`/quiz/${quiz.id}`);
 };
+
+const signOut = async () => {
+  const response = await logOut();
+  
+  if (response.status == 'success') {
+    router.push('/signin');
+  }
+};
+
+const { logOut } = useAuth();
 </script>
 
 <template>
@@ -94,10 +105,11 @@ const selectQuiz = (quiz) => {
       </div>
     </div>
 
-    <Button
-      size="block"
-      text="Ver ranking"
-      @click="router.push('ranking')"
+    <Actions
+      text-left="Sair"
+      text-right="Ranking"
+      @on-handle-left="signOut"
+      @on-handle-right="router.push('/ranking')"
     />
   </div>
 </template>
