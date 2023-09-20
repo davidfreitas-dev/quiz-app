@@ -55,54 +55,73 @@ onMounted(async () => {
       class="text-center"
     />
 
-    <div
-      v-if="!isLoading && users.length"
-      class="flex-1 relative overflow-x-auto w-full mt-5"
-    >
-      <table class="w-full text-sm text-left text-gray-500 overflow-hidden">
-        <thead class="text-xs text-primary-font uppercase">
+    <div class="table flex-1 w-full my-5">
+      <table
+        v-if="!isLoading && users.length"
+        class="w-full text-sm"
+      >
+        <thead class="text-primary-font font-bold uppercase">
           <tr>
-            <th
-              scope="col"
+            <td
               class="py-3"
+              width="7%"
             >
               #
-            </th>
-            <th
-              scope="col"
-              class="p-3"
+            </td>
+            <td
+              class="p-1"
+              width="83%"
             >
               Participante
-            </th>
-            <th
-              scope="col"
+            </td>
+            <td
               class="py-3"
-              align="right"
+              width="10%"
             >
               Pontos
-            </th>
+            </td>
           </tr>
         </thead>
         <tbody>
           <tr
             v-for="(user, index) in users"
             :key="index"
-            class="bg-white"
           >
-            <th
-              scope="row"
-              class="py-4 font-medium text-gray-900 whitespace-nowrap"
-            >
-              {{ index+1 }}  
-            </th>
-
-            <td class="p-3">
-              {{ user.name }}
-            </td>
-
             <td
-              align="right"
-              class="p-4"
+              class="py-3"
+            >
+              {{ index+1 }}
+            </td>
+            <td
+              class="py-2"
+            >
+              <div class="flex items-center">
+                <div
+                  v-if="!user.image"
+                  class="default-img bg-[url('@/assets/user.jpeg')] bg-cover bg-no-repeat bg-center w-10 h-10"
+                />
+              
+                <img
+                  v-else
+                  :src="user.image"
+                  :alt="`Imagem de ${user.name}`"
+                  class="user-img mx-1 w-8 h-8 rounded-full"
+                >
+
+                <div class="pl-2">
+                  <div class="font-semibold">
+                    {{ user.name }}
+                  </div>
+                  
+                  <div class="font-normal text-xs text-gray-500">
+                    {{ user.email }}
+                  </div>
+                </div>  
+              </div>
+            </td>
+            <td
+              class="py-3"
+              align="center"
             >
               {{ user.score }}
             </td>

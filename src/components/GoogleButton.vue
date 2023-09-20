@@ -17,12 +17,14 @@ const signInWithGoogle = () => {
 
   signInWithPopup(getAuth(), provider)
     .then(async (result) => {
+      console.log(result.user);
       localStorage.setItem('bdb.userId', result.user.uid);
 
       await saveData({
         id: result.user.uid,
         email: result.user.email,
-        name: result.user.email,
+        name: result.user.displayName,
+        image: result.user.photoURL,
         quizzes: [],
         score: 0
       });
