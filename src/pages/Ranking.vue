@@ -2,9 +2,13 @@
 import { ref, onMounted } from 'vue';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
+import { useRouter } from 'vue-router';
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
+import Button from '@/components/Button.vue';
 import Loader from '@/components/Loader.vue';
+
+const router = useRouter();
 
 const users = ref([]);
 
@@ -53,9 +57,9 @@ onMounted(async () => {
 
     <div
       v-if="!isLoading && users.length"
-      class="relative overflow-x-auto w-full mt-5"
+      class="flex-1 relative overflow-x-auto w-full mt-5"
     >
-      <table class="w-full text-sm text-left text-gray-500">
+      <table class="w-full text-sm text-left text-gray-500 overflow-hidden">
         <thead class="text-xs text-primary-font uppercase">
           <tr>
             <th
@@ -66,7 +70,7 @@ onMounted(async () => {
             </th>
             <th
               scope="col"
-              class="px-6 py-3"
+              class="p-3"
             >
               Participante
             </th>
@@ -92,7 +96,7 @@ onMounted(async () => {
               {{ index+1 }}  
             </th>
 
-            <td class="px-6 py-4">
+            <td class="p-3">
               {{ user.name }}
             </td>
 
@@ -106,5 +110,11 @@ onMounted(async () => {
         </tbody>
       </table>
     </div>
+
+    <Button
+      size="block"
+      text="Voltar ao início"
+      @click="router.push('/')"
+    />
   </div>
 </template>
