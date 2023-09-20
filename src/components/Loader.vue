@@ -1,8 +1,26 @@
+<script setup>
+const props = defineProps({
+  color: {
+    type: String,
+    default: 'white'
+  }
+});
+</script>
+
 <template>
   <div class="dots">
-    <span class="dot-1" />
-    <span class="dot-2" />
-    <span class="dot-3" />
+    <span
+      class="dot-1"
+      :class="[color === 'primary' ? 'bg-primary' : 'bg-white' ]"
+    />
+    <span
+      class="dot-2"
+      :class="[color === 'primary' ? 'bg-primary' : 'bg-white' ]"
+    />
+    <span
+      class="dot-3"
+      :class="[color === 'primary' ? 'bg-primary' : 'bg-white' ]"
+    />
   </div>
 </template>
 
@@ -17,7 +35,6 @@
   width: 10px;
   height: 10px;
   margin: 0 3px;
-  background: #fff;
   border-radius: 100%;
   display: inline-block;
   animation: sk-bouncedelay 1.3s infinite ease-in-out both;

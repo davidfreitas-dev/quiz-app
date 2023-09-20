@@ -7,6 +7,8 @@ import { ChevronRightIcon } from '@heroicons/vue/24/solid';
 import { useQuizzesStore } from '@/stores/quizzes';
 import { useAuth } from '@/use/useAuth';
 import Heading from '@/components/Heading.vue';
+import Text from '@/components/Text.vue';
+import Loader from '@/components/Loader.vue';
 import Actions from '@/components/Actions.vue';
 
 const user = ref(undefined);
@@ -16,8 +18,6 @@ const getUser = async () => {
   const docSnap = await getDoc(doc(db, 'users', userId));  
   user.value = docSnap.exists() ? docSnap.data() : undefined;
 };
-
-const quizzesStore = useQuizzesStore();
 
 const quizzes = ref([]);
 
@@ -48,10 +48,15 @@ const loadQuizzes = async () => {
   checkQuizzes();
 };
 
+const isLoading = ref(true);
+
+const quizzesStore = useQuizzesStore();
+
 onMounted(async () => {
   getUser();
   await loadQuizzes();
   quizzesStore.setQuizzes(quizzes.value);
+  isLoading.value = false;
 });
 
 const router = useRouter();
@@ -80,7 +85,23 @@ const { logOut } = useAuth();
       text="Selecione a prova que deseja iniciar."
     />
 
-    <div class="quizzes flex flex-1 flex-col items-start w-full gap-3">
+    <div
+      v-if="isLoading"
+      class="flex-1 flex flex-col items-center justify-center w-full"
+    >
+      <Loader color="primary" />
+    </div>
+
+    <Text
+      v-if="!isLoading && !quizzes.length"
+      text="Nenhuma prova no sistema ainda :("
+      class="text-center"
+    />
+
+    <div
+      v-if="!isLoading && quizzes.length"
+      class="quizzes flex flex-1 flex-col items-start w-full gap-3"
+    >
       <div
         v-for="(quiz, index) in quizzes"
         :key="index"

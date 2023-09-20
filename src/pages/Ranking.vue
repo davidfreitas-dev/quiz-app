@@ -3,8 +3,10 @@ import { ref, onMounted } from 'vue';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
 import Heading from '@/components/Heading.vue';
+import Text from '@/components/Text.vue';
+import Loader from '@/components/Loader.vue';
 
-const users = ref(undefined);
+const users = ref([]);
 
 const loadUsers = async () => {
   let data = [];
@@ -21,8 +23,11 @@ const loadUsers = async () => {
   users.value = data.sort((a, b) => b.score - a.score);
 };
 
+const isLoading = ref(true);
+
 onMounted(async () => {
   await loadUsers();
+  isLoading.value = false;
 });
 </script>
 
@@ -32,8 +37,24 @@ onMounted(async () => {
       size="lg"
       text="Ranking"
     />
+    
+    <div
+      v-if="isLoading"
+      class="flex-1 flex flex-col items-center justify-center w-full"
+    >
+      <Loader color="primary" />
+    </div>
 
-    <div class="relative overflow-x-auto w-full mt-5">
+    <Text
+      v-if="!isLoading && !users.length"
+      text="Nenhum participante cadastrado ainda :("
+      class="text-center"
+    />
+
+    <div
+      v-if="!isLoading && users.length"
+      class="relative overflow-x-auto w-full mt-5"
+    >
       <table class="w-full text-sm text-left text-gray-500">
         <thead class="text-xs text-primary-font uppercase">
           <tr>
