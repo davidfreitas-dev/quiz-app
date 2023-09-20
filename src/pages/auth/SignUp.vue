@@ -13,8 +13,6 @@ import Button from '@/components/Button.vue';
 import GoogleButton from '@/components/GoogleButton.vue';
 import Toast from '@/components/Toast.vue';
 
-const router = useRouter();
-
 const formData = reactive({
   name: '',
   email: '',
@@ -27,23 +25,7 @@ const saveData = async (userData) => {
   await setDoc(usersRef, userData);
 };
 
-const signInWithGoogle = (response) => {
-  if (response.status != 'success') {
-    handleException(response.code);    
-    handleToast(response.status, exception);
-    return;
-  }
-
-  saveData({
-    id: response.data.uid,
-    email: response.data.email,
-    name: formData.name || response.data.email,
-    quizzes: [],
-    score: 0
-  });
-
-  router.push('/');
-};
+const router = useRouter();
 
 const isLoading = ref(false);
 
@@ -155,7 +137,7 @@ const { toast, toastData, handleToast } = useToast();
         class="mt-4"
       />
 
-      <GoogleButton @on-google-auth="signInWithGoogle" />
+      <GoogleButton />
     </form>
 
     <footer class="flex flex-col items-center gap-4 mt-8">

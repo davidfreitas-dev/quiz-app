@@ -1,25 +1,36 @@
 <script setup>
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '@/services/firebase-firestore';
+import { useRouter } from 'vue-router';
 
-const emit = defineEmits(['onGoogleAuth']);
+const saveData = async (userData) => {
+  const usersRef = doc(db, 'users', userData.id);
+
+  await setDoc(usersRef, userData);
+};
+
+const router = useRouter();
 
 const signInWithGoogle = () => {
   const provider = new GoogleAuthProvider();    
 
   signInWithPopup(getAuth(), provider)
-    .then((result) => {
-      emit('onGoogleAuth', {
-        status: 'success',
-        message: 'Logado com sucesso!',
-        data: result.user
+    .then(async (result) => {
+      localStorage.setItem('bdb.userId', result.user.uid);
+
+      await saveData({
+        id: result.user.uid,
+        email: result.user.email,
+        name: result.user.email,
+        quizzes: [],
+        score: 0
       });
+
+      router.push('/');
     })
     .catch((err) => {
-      emit('onGoogleAuth', {
-        code: err.code,
-        status: 'error',
-        message: err.message
-      });
+      console.log(err);
     });
 };
 </script>
