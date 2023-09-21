@@ -31,7 +31,7 @@ const checkQuizzes = async () => {
   });
 };
 
-const loadQuizzes = async () => {
+const getQuizzes = async () => {
   let data = [];
 
   const querySnapshot = await getDocs(collection(db, 'quizzes'));
@@ -43,7 +43,7 @@ const loadQuizzes = async () => {
     });
   });
 
-  quizzes.value = data;
+  quizzes.value = data.sort((a, b) => a.id - b.id);
 
   checkQuizzes();
 };
@@ -54,7 +54,7 @@ const quizzesStore = useQuizzesStore();
 
 onMounted(async () => {
   getUser();
-  await loadQuizzes();
+  await getQuizzes();
   quizzesStore.setQuizzes(quizzes.value);
   isLoading.value = false;
 });
