@@ -1,18 +1,17 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/services/firebase-firestore';
 import { useRoute, useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user';
 import Button from '@/components/Button.vue';
 
 const route = useRoute();
 const router = useRouter();
 const quiz = ref(null);
 
+const userStore = useUserStore();
+
 onMounted(async () => {
-  const userId = localStorage.getItem('bdb.userId');
-  const docSnap = await getDoc(doc(db, 'users', userId));  
-  const user = docSnap.exists() ? docSnap.data() : null;
+  const user = userStore.user;
 
   quiz.value = user.quizzes.find(quiz => quiz.id === Number(route.params.id));
 });

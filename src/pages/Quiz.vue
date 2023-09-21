@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
+import { useUserStore } from '@/stores/user';
 import { useQuizzesStore } from '@/stores/quizzes';
 import { useToast } from '@/use/useToast';
 import { CheckCircleIcon } from '@heroicons/vue/24/solid';
@@ -62,23 +63,23 @@ const checkAnswers = async () => {
   });
 };
 
-const saveData = async () => {
-  const userId = localStorage.getItem('bdb.userId');
-  const docSnap = await getDoc(doc(db, 'users', userId));  
-  const userData = docSnap.exists() ? docSnap.data() : null;
+const userStore = useUserStore();
 
-  userData.quizzes.push({
+const saveData = async () => {
+  const user = userStore.user;
+
+  user.quizzes.push({
     id: quiz.value.id,
     answers: userAnswers.value,
     score: score.value
   });
 
-  const totalScore = userData.quizzes
+  const totalScore = user.quizzes
     .map(quiz => quiz.score * 1)
     .reduce((total, current) => total + current, 0);
 
-  await updateDoc(doc(db, 'users', userId), {
-    quizzes: userData.quizzes,
+  await updateDoc(doc(db, 'users', user.id), {
+    quizzes: user.quizzes,
     score: totalScore
   });
 };

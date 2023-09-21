@@ -1,9 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { collection, getDocs, getDoc, doc } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
 import { ChevronRightIcon } from '@heroicons/vue/24/solid';
+import { useUserStore } from '@/stores/user';
 import { useQuizzesStore } from '@/stores/quizzes';
 import { useAuth } from '@/use/useAuth';
 import Heading from '@/components/Heading.vue';
@@ -11,24 +12,22 @@ import Text from '@/components/Text.vue';
 import Loader from '@/components/Loader.vue';
 import Actions from '@/components/Actions.vue';
 
-const user = ref(undefined);
-
-const getUser = async () => {
-  const userId = localStorage.getItem('bdb.userId');
-  const docSnap = await getDoc(doc(db, 'users', userId));  
-  user.value = docSnap.exists() ? docSnap.data() : undefined;
-};
+const userStore = useUserStore();
 
 const quizzes = ref([]);
 
 const checkQuizzes = async () => {
-  user.value.quizzes.forEach(el => {
-    quizzes.value.forEach(quiz => {
-      if (quiz.id === el.id) {
-        quiz.score = el.score;
-      }
+  const user = userStore.user;
+
+  if (user && user.quizzes.length) {
+    user.quizzes.forEach(el => {
+      quizzes.value.forEach(quiz => {
+        if (quiz.id === el.id) {
+          quiz.score = el.score;
+        }
+      });
     });
-  });
+  }  
 };
 
 const getQuizzes = async () => {
@@ -53,7 +52,6 @@ const isLoading = ref(true);
 const quizzesStore = useQuizzesStore();
 
 onMounted(async () => {
-  getUser();
   await getQuizzes();
   quizzesStore.setQuizzes(quizzes.value);
   isLoading.value = false;
