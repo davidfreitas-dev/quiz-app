@@ -6,6 +6,7 @@ import { useAuth } from '@/use/useAuth';
 import { useException } from '@/use/useException';
 import { useToast } from '@/use/useToast';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user';
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
 import TextInput from '@/components/TextInput.vue';
@@ -13,21 +14,23 @@ import Button from '@/components/Button.vue';
 import GoogleButton from '@/components/GoogleButton.vue';
 import Toast from '@/components/Toast.vue';
 
+const userStore = useUserStore();
+
+const saveData = async (userData) => {
+  userStore.setUser(userData);
+  
+  await setDoc(doc(db, 'users', userData.id), userData);
+};
+
+const isLoading = ref(false);
+
 const formData = reactive({
   name: '',
   email: '',
   password: ''
 });
 
-const saveData = async (userData) => {
-  const usersRef = doc(db, 'users', userData.id);
-
-  await setDoc(usersRef, userData);
-};
-
 const router = useRouter();
-
-const isLoading = ref(false);
 
 const register = async () => {
   isLoading.value = true;
@@ -35,15 +38,15 @@ const register = async () => {
   const response = await signUp(formData);
 
   if (response.status == 'success') {
-    localStorage.setItem('bdb.userId', response.data.uid);
-    
-    saveData({
+    const userData = {
       id: response.data.uid,
       email: response.data.email,
       name: formData.name,
       quizzes: [],
       score: 0
-    });
+    };
+    
+    saveData(userData);
 
     router.push('/');
   } else {

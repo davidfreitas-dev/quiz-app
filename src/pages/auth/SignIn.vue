@@ -1,9 +1,12 @@
 <script setup>
 import { ref, reactive } from 'vue';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/services/firebase-firestore';
 import { useAuth } from '@/use/useAuth';
 import { useException } from '@/use/useException';
 import { useToast } from '@/use/useToast';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user';
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
 import TextInput from '@/components/TextInput.vue';
@@ -11,7 +14,14 @@ import Button from '@/components/Button.vue';
 import GoogleButton from '@/components/GoogleButton.vue';
 import Toast from '@/components/Toast.vue';
 
-const router = useRouter();
+const userStore = useUserStore();
+
+const getUser = async (userId) => {
+  const docSnap = await getDoc(doc(db, 'users', userId));  
+  const userData = docSnap.exists() ? docSnap.data() : undefined;
+
+  userStore.setUser(userData);
+};
 
 const isLoading = ref(false);
 
@@ -20,13 +30,15 @@ const formData = reactive({
   password: ''
 });
 
+const router = useRouter();
+
 const login = async () => {
   isLoading.value = true;
 
   const response = await signIn(formData);
 
   if (response.status == 'success') {
-    localStorage.setItem('bdb.userId', response.data.uid);
+    await getUser(response.data.uid);
 
     router.push('/');
   } else {

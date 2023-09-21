@@ -2,6 +2,7 @@
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
+import { useUserStore } from '@/stores/user';
 import { useRouter } from 'vue-router';
 
 const getUser = async (userId) => {
@@ -16,6 +17,8 @@ const saveData = async (userData) => {
   await setDoc(usersRef, userData);
 };
 
+const userStore = useUserStore();
+
 const router = useRouter();
 
 const signInWithGoogle = () => {
@@ -23,20 +26,22 @@ const signInWithGoogle = () => {
 
   signInWithPopup(getAuth(), provider)
     .then(async (result) => {
-      const userExists = await getUser(result.user.uid);
-
-      if (!userExists) {
-        await saveData({
+      let userData = await getUser(result.user.uid);
+        
+      if (!userData) {
+        userData = {
           id: result.user.uid,
           email: result.user.email,
           name: result.user.displayName,
           image: result.user.photoURL,
           quizzes: [],
           score: 0
-        });
-      }
-      
-      localStorage.setItem('bdb.userId', result.user.uid);
+        };
+
+        saveData(userData);
+      } 
+
+      userStore.setUser(userData);
 
       router.push('/');
     })
