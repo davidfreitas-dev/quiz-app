@@ -1,8 +1,14 @@
 <script setup>
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
 import { useRouter } from 'vue-router';
+
+const getUser = async (userId) => {
+  const docSnap = await getDoc(doc(db, 'users', userId)); 
+
+  return docSnap.exists() ? docSnap.data() : undefined;
+};
 
 const saveData = async (userData) => {
   const usersRef = doc(db, 'users', userData.id);
@@ -17,17 +23,20 @@ const signInWithGoogle = () => {
 
   signInWithPopup(getAuth(), provider)
     .then(async (result) => {
-      console.log(result.user);
-      localStorage.setItem('bdb.userId', result.user.uid);
+      const userExists = await getUser(result.user.uid);
 
-      await saveData({
-        id: result.user.uid,
-        email: result.user.email,
-        name: result.user.displayName,
-        image: result.user.photoURL,
-        quizzes: [],
-        score: 0
-      });
+      if (!userExists) {
+        await saveData({
+          id: result.user.uid,
+          email: result.user.email,
+          name: result.user.displayName,
+          image: result.user.photoURL,
+          quizzes: [],
+          score: 0
+        });
+      }
+      
+      localStorage.setItem('bdb.userId', result.user.uid);
 
       router.push('/');
     })
