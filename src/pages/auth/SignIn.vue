@@ -2,11 +2,11 @@
 import { ref, reactive } from 'vue';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
+import { useRouter } from 'vue-router';
 import { useAuth } from '@/use/useAuth';
 import { useException } from '@/use/useException';
+import { useStorage } from '@/use/useStorage';
 import { useToast } from '@/use/useToast';
-import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user';
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
 import TextInput from '@/components/TextInput.vue';
@@ -14,13 +14,11 @@ import Button from '@/components/Button.vue';
 import GoogleButton from '@/components/GoogleButton.vue';
 import Toast from '@/components/Toast.vue';
 
-const userStore = useUserStore();
-
 const getUser = async (userId) => {
   const docSnap = await getDoc(doc(db, 'users', userId));  
   const userData = docSnap.exists() ? docSnap.data() : undefined;
 
-  userStore.setUser(userData);
+  setStorage('user', userData);
 };
 
 const isLoading = ref(false);
@@ -62,6 +60,7 @@ const validateForm = (event) => {
 };
 
 const { signIn } = useAuth();
+const { setStorage } = useStorage();
 const { handleException, exception } = useException();
 const { toast, toastData, handleToast } = useToast();
 </script>

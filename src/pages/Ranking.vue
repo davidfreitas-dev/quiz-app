@@ -1,8 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
-import { useRouter } from 'vue-router';
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
 import Button from '@/components/Button.vue';
@@ -11,6 +11,8 @@ import Loader from '@/components/Loader.vue';
 const router = useRouter();
 
 const users = ref([]);
+
+const isLoading = ref(true);
 
 const loadUsers = async () => {
   let data = [];
@@ -25,13 +27,12 @@ const loadUsers = async () => {
   });
 
   users.value = data.sort((a, b) => b.score - a.score);
-};
 
-const isLoading = ref(true);
+  isLoading.value = false;
+};
 
 onMounted(async () => {
   await loadUsers();
-  isLoading.value = false;
 });
 </script>
 

@@ -1,9 +1,9 @@
 <script setup>
+import { useRouter } from 'vue-router';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
-import { useUserStore } from '@/stores/user';
-import { useRouter } from 'vue-router';
+import { useStorage } from '@/use/useStorage';
 
 const getUser = async (userId) => {
   const docSnap = await getDoc(doc(db, 'users', userId)); 
@@ -16,8 +16,6 @@ const saveData = async (userData) => {
 
   await setDoc(usersRef, userData);
 };
-
-const userStore = useUserStore();
 
 const router = useRouter();
 
@@ -41,7 +39,7 @@ const signInWithGoogle = () => {
         saveData(userData);
       } 
 
-      userStore.setUser(userData);
+      setStorage(userData);
 
       router.push('/');
     })
@@ -49,6 +47,8 @@ const signInWithGoogle = () => {
       console.log(err);
     });
 };
+
+const { setStorage } = useStorage();
 </script>
 
 <template>

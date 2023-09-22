@@ -1,10 +1,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDocs, collection, query, where, updateDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
-import { useUserStore } from '@/stores/user';
-import { useQuizzesStore } from '@/stores/quizzes';
+import { useStorage } from '@/use/useStorage';
 import { useToast } from '@/use/useToast';
 import { CheckCircleIcon } from '@heroicons/vue/24/solid';
 import Progressbar from '@/components/Progressbar.vue';
@@ -14,15 +13,19 @@ import Actions from '@/components/Actions.vue';
 import Toast from '@/components/Toast.vue';
 
 const route = useRoute();
-const router = useRouter();
-const quizzesStore = useQuizzesStore();
 
 const quiz = ref(undefined);
 
-const loadQuiz = () => {
+const loadQuiz = async () => {
   const quizId = Number(route.params.id);
   
-  quiz.value = quizzesStore.quizzes.find(quiz => quiz.id === quizId);
+  const q = query(collection(db, 'quizzes'), where('id', '==', quizId));
+
+  const querySnapshot = await getDocs(q);
+
+  querySnapshot.forEach((doc) => {
+    quiz.value = doc.data();
+  });
 };
 
 onMounted(() => {
@@ -63,10 +66,8 @@ const checkAnswers = async () => {
   });
 };
 
-const userStore = useUserStore();
-
 const saveData = async () => {
-  const user = userStore.user;
+  let user = getStorage('user');
 
   user.quizzes.push({
     id: quiz.value.id,
@@ -78,10 +79,14 @@ const saveData = async () => {
     .map(quiz => quiz.score * 1)
     .reduce((total, current) => total + current, 0);
 
+  user['score'] = totalScore;
+
   await updateDoc(doc(db, 'users', user.id), {
     quizzes: user.quizzes,
     score: totalScore
   });
+
+  setStorage('user', user);
 };
 
 const previousQuestion = () => {
@@ -93,6 +98,8 @@ const previousQuestion = () => {
 const isLastQuestion = computed(() => {
   return currentQuestionIndex.value === quiz.value.questions.length - 1;
 });
+
+const router = useRouter();
 
 const nextQuestion = async () => {
   const currentQuestion = quiz.value.questions[currentQuestionIndex.value];
@@ -119,6 +126,7 @@ const progress = computed(() => {
   return (100 / questionsCount) * (currentQuestionIndex.value + 1);
 });
 
+const { getStorage, setStorage } = useStorage();
 const { toast, toastData, handleToast } = useToast();
 </script>
 

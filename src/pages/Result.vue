@@ -1,17 +1,15 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user';
+import { useStorage } from '@/use/useStorage';
 import Button from '@/components/Button.vue';
 
 const route = useRoute();
 const router = useRouter();
-const quiz = ref(null);
-
-const userStore = useUserStore();
+const quiz = ref(undefined);
 
 onMounted(async () => {
-  const user = userStore.user;
+  const user = getStorage('user');
 
   quiz.value = user.quizzes.find(quiz => quiz.id === Number(route.params.id));
 });
@@ -45,6 +43,8 @@ const emoji = computed(() => {
     return 'Nota não especificada nos intervalos.';
   }
 });
+
+const { getStorage } = useStorage();
 </script>
 
 <template>

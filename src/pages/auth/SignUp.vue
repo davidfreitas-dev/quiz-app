@@ -3,10 +3,10 @@ import { ref, reactive } from 'vue';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
 import { useAuth } from '@/use/useAuth';
+import { useStorage } from '@/use/useStorage';
 import { useException } from '@/use/useException';
 import { useToast } from '@/use/useToast';
 import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user';
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
 import TextInput from '@/components/TextInput.vue';
@@ -14,10 +14,8 @@ import Button from '@/components/Button.vue';
 import GoogleButton from '@/components/GoogleButton.vue';
 import Toast from '@/components/Toast.vue';
 
-const userStore = useUserStore();
-
 const saveData = async (userData) => {
-  userStore.setUser(userData);
+  setStorage(userData);
   
   await setDoc(doc(db, 'users', userData.id), userData);
 };
@@ -70,6 +68,7 @@ const validateForm = (event) => {
 };
 
 const { signUp } = useAuth();
+const { setStorage } = useStorage();
 const { handleException, exception } = useException();
 const { toast, toastData, handleToast } = useToast();
 </script>
