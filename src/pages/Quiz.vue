@@ -9,12 +9,15 @@ import { CheckCircleIcon } from '@heroicons/vue/24/solid';
 import Progressbar from '@/components/Progressbar.vue';
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
+import Loader from '@/components/Loader.vue';
 import Actions from '@/components/Actions.vue';
 import Toast from '@/components/Toast.vue';
 
 const route = useRoute();
 
 const quiz = ref(undefined);
+
+const isLoading = ref(true);
 
 const loadQuiz = async () => {
   const quizId = Number(route.params.id);
@@ -26,6 +29,8 @@ const loadQuiz = async () => {
   querySnapshot.forEach((doc) => {
     quiz.value = doc.data();
   });
+
+  isLoading.value = false;
 };
 
 onMounted(() => {
@@ -132,7 +137,14 @@ const { toast, toastData, handleToast } = useToast();
 
 <template>
   <div
-    v-if="quiz"
+    v-if="isLoading"
+    class="flex flex-col items-center justify-center w-full h-screen"
+  >
+    <Loader color="primary" />
+  </div>
+
+  <div
+    v-if="!isLoading && quiz"
     class="quiz-container flex flex-col items-start w-full min-h-screen p-7"
   >
     <Text

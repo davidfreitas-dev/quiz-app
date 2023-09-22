@@ -56,7 +56,7 @@ onMounted(async () => {
       class="text-center"
     />
 
-    <div class="table flex-1 w-full my-5">
+    <div class="table w-full mt-5 mb-20">
       <table
         v-if="!isLoading && users.length"
         class="w-full text-sm"
@@ -131,10 +131,12 @@ onMounted(async () => {
       </table>
     </div>
 
-    <Button
-      size="block"
-      text="Voltar ao início"
-      @click="router.push('/')"
-    />
+    <div class="absolute left-0 bottom-0 w-full p-[5%]">
+      <Button
+        size="block"
+        text="Voltar ao início"
+        @click="router.push('/')"
+      />
+    </div>
   </div>
 </template>
