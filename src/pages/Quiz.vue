@@ -15,11 +15,39 @@ import Toast from '@/components/Toast.vue';
 
 const route = useRoute();
 
+const user = ref(undefined);
+
+const getUser = () => {
+  user.value = getStorage('user');
+};
+
+const isQuizDone = ref(false);
+
+const checkQuizDone = async (quizId) => {
+  isQuizDone.value = user.value.quizzes.some(quiz => quiz.id === quizId);
+
+  if (isQuizDone.value) {
+    const userCurrentQuiz = user.value.quizzes.filter(quiz => quiz.id === quizId)[0];
+    
+    quiz.value.questions.forEach(question => {
+      userCurrentQuiz.answers.forEach(answer => {
+        if (question.id === answer.id) {
+          question.options.forEach(option => {
+            if (option.option === answer.option) {
+              option.selected = true;
+            }
+          });
+        }
+      });
+    });
+  }
+};
+
 const quiz = ref(undefined);
 
 const isLoading = ref(true);
 
-const loadQuiz = async () => {
+const getQuiz = async () => {
   const quizId = Number(route.params.id);
   
   const q = query(collection(db, 'quizzes'), where('id', '==', quizId));
@@ -30,16 +58,21 @@ const loadQuiz = async () => {
     quiz.value = doc.data();
   });
 
+  await checkQuizDone(quizId);
+
   isLoading.value = false;
 };
 
-onMounted(() => {
-  loadQuiz();
+onMounted(async () => {
+  getUser();
+  getQuiz();
 });
 
 const currentQuestionIndex = ref(0);
 
-const selectOption = (index) => {
+const selectQuizOption = (index) => {
+  if (isQuizDone.value) return;
+
   const currentQuestion = quiz.value.questions[currentQuestionIndex.value];
 
   currentQuestion.options.forEach(option => {
@@ -72,26 +105,24 @@ const checkAnswers = async () => {
 };
 
 const saveData = async () => {
-  let user = getStorage('user');
-
-  user.quizzes.push({
+  user.value.quizzes.push({
     id: quiz.value.id,
     answers: userAnswers.value,
     score: score.value
   });
 
-  const totalScore = user.quizzes
+  const totalScore = user.value.quizzes
     .map(quiz => quiz.score * 1)
     .reduce((total, current) => total + current, 0);
 
-  user['score'] = totalScore;
+  user.value['score'] = totalScore;
 
-  await updateDoc(doc(db, 'users', user.id), {
-    quizzes: user.quizzes,
+  await updateDoc(doc(db, 'users', user.value.id), {
+    quizzes: user.value.quizzes,
     score: totalScore
   });
 
-  setStorage('user', user);
+  setStorage('user', user.value);
 };
 
 const previousQuestion = () => {
@@ -111,7 +142,7 @@ const nextQuestion = async () => {
 
   const hasSelectedOption = currentQuestion.options.some(option => option.selected);
 
-  if (!hasSelectedOption) {
+  if (!isQuizDone.value && !hasSelectedOption) {
     handleToast('error', 'Selecione uma opção antes de continuar');
     return;
   }
@@ -119,8 +150,14 @@ const nextQuestion = async () => {
   if (!isLastQuestion.value) {
     currentQuestionIndex.value++;
   } else {
+    if (isQuizDone.value) {
+      router.push('/');
+      return;
+    }
+
     await checkAnswers();
     await saveData();
+
     router.push(`/result/${quiz.value.id}`);
   }
 };
@@ -174,7 +211,7 @@ const { toast, toastData, handleToast } = useToast();
         <div
           class="option flex items-center gap-2 px-5 w-full h-14 rounded-2xl transition-colors"
           :class="[ item.selected ? 'text-primary bg-primary-light' : 'text-primary-font bg-light' ]"
-          @click="selectOption(index)"
+          @click="selectQuizOption(index)"
         >
           <CheckCircleIcon
             v-if="item.selected"

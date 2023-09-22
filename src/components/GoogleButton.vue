@@ -37,9 +37,9 @@ const signInWithGoogle = () => {
         };
 
         saveData(userData);
-      } 
+      }
 
-      setStorage(userData);
+      setStorage('user', userData);
 
       router.push('/');
     })
