@@ -37,7 +37,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-col items-start w-full min-h-screen p-7">
+  <div class="flex flex-col items-start w-full p-7">
     <Heading
       size="lg"
       text="Ranking"
@@ -131,7 +131,7 @@ onMounted(async () => {
       </table>
     </div>
 
-    <div class="absolute left-0 bottom-0 w-full p-[5%]">
+    <div class="fixed left-0 bottom-0 w-full p-[5%]">
       <Button
         size="block"
         text="Voltar ao início"
