@@ -61,7 +61,7 @@ onMounted(async () => {
         v-if="!isLoading && users.length"
         class="w-full text-sm"
       >
-        <thead class="text-primary-font font-bold uppercase">
+        <thead class="text-dark font-bold uppercase">
           <tr>
             <td
               class="py-3"

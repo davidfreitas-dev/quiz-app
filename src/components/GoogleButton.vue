@@ -53,9 +53,9 @@ const { setStorage } = useStorage();
 
 <template>
   <div class="relative flex py-5 items-center">
-    <div class="flex-grow border-t text-primary-font" />
-    <span class="flex-shrink mx-4 text-primary-font">ou</span>
-    <div class="flex-grow border-t text-primary-font" />
+    <div class="flex-grow border-t text-dark" />
+    <span class="flex-shrink mx-4 text-dark">ou</span>
+    <div class="flex-grow border-t text-dark" />
   </div>
 
   <button

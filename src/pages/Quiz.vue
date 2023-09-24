@@ -212,8 +212,11 @@ const { toast, toastData, handleToast } = useToast();
         :key="index"
       >
         <div
-          class="option flex items-center gap-2 px-5 w-full h-14 rounded-2xl transition-colors"
-          :class="[ item.selected ? 'text-primary bg-primary-light' : 'text-primary-font bg-light' ]"
+          class="option flex items-center gap-2 px-5 w-full h-14 rounded-2xl transition-colors text-dark bg-light"
+          :class="{ 
+            'text-primary bg-primary-light': item.selected,
+            'text-success bg-success-light': item.option === quiz.questions[currentQuestionIndex].answer && isQuizDone,
+          }"
           @click="selectQuizOption(index)"
         >
           <CheckCircleIcon
@@ -223,7 +226,8 @@ const { toast, toastData, handleToast } = useToast();
 
           <span
             v-else
-            class="h-5 w-5 mr-1 border-2 border-secondary-font rounded-full"
+            class="h-5 w-5 mr-1 border-2 border-secondary-light rounded-full"
+            :class="{ 'border-success border-opacity-20': item.option === quiz.questions[currentQuestionIndex].answer && isQuizDone }"
           />
 
           <label class="ml-2 text-sm font-semibold">

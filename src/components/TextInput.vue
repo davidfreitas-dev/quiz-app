@@ -29,7 +29,7 @@ const updateValue = (event) => {
 </script>
 
 <template>
-  <div class="flex items-center gap-2 w-full h-12 rounded-xl border-2 border-secondary-font bg-white focus-within:ring-2 ring-primary transition-colors p-4">
+  <div class="flex items-center gap-2 w-full h-12 rounded-xl border-2 border-secondary-light bg-white focus-within:ring-2 ring-primary transition-colors p-4">
     <UserIcon
       v-if="(icon === 'UserIcon')"
       class="w-5 h-5 text-gray-400"
@@ -46,7 +46,7 @@ const updateValue = (event) => {
     />
 
     <input
-      className="bg-transparent flex-1 text-primary-font text-sm font-medium placeholder:text-gray-400 outline-none"
+      className="bg-transparent flex-1 text-dark text-sm font-medium placeholder:text-gray-400 outline-none"
       :type="type"
       :value="modelValue"
       :placeholder="text"

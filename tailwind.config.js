@@ -17,13 +17,14 @@ export default {
     extend: {},
     colors: {
       ...colors,
-      primary: '#7d64e7',
-      secondary: '#9ea0b2',
-      light: '#f7f8fc',
+      dark: '#464757',
+      primary: '#7b63dd',
+      secondary: '#8a90a6',
       success: '#61cdb9',
+      light: '#f7f8fc',
       'primary-light': '#eae9f9',
-      'primary-font': '#444865',
-      'secondary-font': '#ebeaee'
+      'secondary-light': '#eeeeee',
+      'success-light': '#eefafe'
     }
   },
   plugins: [],

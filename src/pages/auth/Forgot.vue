@@ -45,7 +45,7 @@ const { toast, toastData, handleToast } = useToast();
 </script>
 
 <template>
-  <div class="flex flex-col items-center w-full min-h-screen text-primary-font p-7">
+  <div class="flex flex-col items-center w-full min-h-screen text-dark p-7">
     <header class="flex flex-col items-start w-full">
       <Heading
         size="lg"

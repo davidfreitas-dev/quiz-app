@@ -18,7 +18,7 @@ const props = defineProps({
       'text-xl': size === 'md',
       'text-2xl': size === 'lg',
     }"
-    class="text-primary-font font-bold font-sans"
+    class="text-dark font-bold font-sans"
   >
     {{ text }}
   </span>
