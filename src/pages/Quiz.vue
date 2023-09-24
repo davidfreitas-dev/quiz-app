@@ -128,7 +128,10 @@ const saveData = async () => {
 const previousQuestion = () => {
   if (currentQuestionIndex.value > 0) {
     currentQuestionIndex.value--;
+    return;
   }
+
+  router.push('/');
 };
 
 const isLastQuestion = computed(() => {
@@ -231,7 +234,7 @@ const { toast, toastData, handleToast } = useToast();
     </div>
 
     <Actions
-      text-left="Anterior"
+      :text-left="currentQuestionIndex === 0 ? 'Voltar' : 'Anterior'"
       :text-right="isLastQuestion ? 'Finalizar' : 'Próxima'"
       @on-handle-left="previousQuestion"
       @on-handle-right="nextQuestion"
