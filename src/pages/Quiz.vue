@@ -27,16 +27,14 @@ const checkQuizDone = async (quizId) => {
   isQuizDone.value = user.value.quizzes.some(quiz => quiz.id === quizId);
 
   if (isQuizDone.value) {
-    const userCurrentQuiz = user.value.quizzes.filter(quiz => quiz.id === quizId)[0];
+    const answers = user.value.quizzes.find(quiz => quiz.id === quizId).answers;
     
     quiz.value.questions.forEach(question => {
-      userCurrentQuiz.answers.forEach(answer => {
-        if (question.id === answer.id) {
-          question.options.forEach(option => {
-            if (option.option === answer.option) {
-              option.selected = true;
-            }
-          });
+      const answer = answers.find(a => a.id === question.id);
+
+      question.options.forEach(option => {
+        if (option.option === answer.option) {
+          option.selected = true;
         }
       });
     });
