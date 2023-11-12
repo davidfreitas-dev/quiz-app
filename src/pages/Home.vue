@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
 import { useAuth } from '@/use/useAuth';
 import { useStorage } from '@/use/useStorage';
@@ -14,12 +14,22 @@ import Actions from '@/components/Actions.vue';
 const quizzes = ref([]);
 
 const checkQuizzes = async () => {
+  let userQuizzes = [];
+
   const user = getStorage('user');
 
-  if (user && user.quizzes.length) {
-    user.quizzes.forEach(el => {
+  const q = query(collection(db, 'results'), where('iduser', '==', user.id));
+
+  const querySnapshot = await getDocs(q);
+
+  querySnapshot.forEach((doc) => {
+    userQuizzes.push(doc.data());
+  });
+
+  if (userQuizzes.length) {
+    userQuizzes.forEach(el => {
       quizzes.value.forEach(quiz => {
-        if (quiz.id === el.id) {
+        if (quiz.id === el.idquiz) {
           quiz.score = el.score;
         }
       });

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { doc, getDocs, collection, query, where, updateDoc } from 'firebase/firestore';
+import { collection, query, where, doc, setDoc, getDocs } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
 import { useStorage } from '@/use/useStorage';
 import { useToast } from '@/use/useToast';
@@ -23,15 +23,29 @@ const getUser = () => {
 
 const isQuizDone = ref(false);
 
-const checkQuizDone = async (quizId) => {
-  isQuizDone.value = user.value.quizzes.some(quiz => quiz.id === quizId);
+const checkQuizDone = async () => {
+  let quizData = null;
+
+  const q = query(
+    collection(db, 'results'), 
+    where('idquiz', '==', Number(route.params.id)), 
+    where('iduser', '==', user.value.id)
+  );
+
+  const querySnapshot = await getDocs(q);
+
+  querySnapshot.forEach((doc) => {
+    quizData = doc.data();
+  });
+  
+  isQuizDone.value = quizData ? true : false;
 
   if (isQuizDone.value) {
-    const answers = user.value.quizzes.find(quiz => quiz.id === quizId).answers;
-    
-    quiz.value.questions.forEach(question => {
-      const answer = answers.find(a => a.id === question.id);
+    if (!quizData.answers.length) return;
 
+    quiz.value.questions.forEach(question => {
+      const answer = quizData.answers.find(a => a.id === question.id);
+      
       question.options.forEach(option => {
         if (option.option === answer.option) {
           option.selected = true;
@@ -56,7 +70,7 @@ const getQuiz = async () => {
     quiz.value = doc.data();
   });
 
-  await checkQuizDone(quizId);
+  await checkQuizDone();
 
   isLoading.value = false;
 };
@@ -103,24 +117,14 @@ const checkAnswers = async () => {
 };
 
 const saveData = async () => {
-  user.value.quizzes.push({
-    id: quiz.value.id,
+  const docRef = doc(collection(db, 'results'));
+
+  await setDoc(docRef, {
     answers: userAnswers.value,
+    idquiz: quiz.value.id,
+    iduser: user.value.id,
     score: score.value
   });
-
-  const totalScore = user.value.quizzes
-    .map(quiz => quiz.score * 1)
-    .reduce((total, current) => total + current, 0);
-
-  user.value['score'] = totalScore;
-
-  await updateDoc(doc(db, 'users', user.value.id), {
-    quizzes: user.value.quizzes,
-    score: totalScore
-  });
-
-  setStorage('user', user.value);
 };
 
 const previousQuestion = () => {
@@ -150,17 +154,18 @@ const nextQuestion = async () => {
 
   if (!isLastQuestion.value) {
     currentQuestionIndex.value++;
-  } else {
-    if (isQuizDone.value) {
-      router.push('/');
-      return;
-    }
-
-    await checkAnswers();
-    await saveData();
-
-    router.push(`/result/${quiz.value.id}`);
+    return;
+  } 
+  
+  if (isQuizDone.value) {
+    router.push('/');
+    return;
   }
+
+  await checkAnswers();
+  await saveData();
+
+  router.push(`/result/${quiz.value.id}`);
 };
 
 const progress = computed(() => {
@@ -169,7 +174,7 @@ const progress = computed(() => {
   return (100 / questionsCount) * (currentQuestionIndex.value + 1);
 });
 
-const { getStorage, setStorage } = useStorage();
+const { getStorage } = useStorage();
 const { toast, toastData, handleToast } = useToast();
 </script>
 

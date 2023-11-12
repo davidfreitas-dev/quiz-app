@@ -15,7 +15,7 @@ import GoogleButton from '@/components/GoogleButton.vue';
 import Toast from '@/components/Toast.vue';
 
 const saveData = async (userData) => {
-  setStorage(userData);
+  setStorage('user', userData);
   
   await setDoc(doc(db, 'users', userData.id), userData);
 };
@@ -39,9 +39,7 @@ const register = async () => {
     const userData = {
       id: response.data.uid,
       email: response.data.email,
-      name: formData.name,
-      quizzes: [],
-      score: 0
+      name: formData.name
     };
     
     saveData(userData);
