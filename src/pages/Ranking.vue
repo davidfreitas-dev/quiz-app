@@ -1,38 +1,60 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
 import Button from '@/components/Button.vue';
-import Loader from '@/components/Loader.vue';
 
 const router = useRouter();
-
+const isLoading = ref(true);
+const results = ref([]);
 const users = ref([]);
 
-const isLoading = ref(true);
-
-const loadUsers = async () => {
-  let data = [];
-
+const getUsers = async () => {
   const querySnapshot = await getDocs(collection(db, 'users'));
 
   querySnapshot.forEach((doc) => {
-    data.push({
+    users.value.push({
       ...{ id: doc.id },
+      ...{ score: 0 },
       ...doc.data()
     });
   });
 
-  users.value = data.sort((a, b) => b.score - a.score);
+  await getResults();
 
   isLoading.value = false;
 };
 
-onMounted(async () => {
-  await loadUsers();
+const getResults = async () => {
+  const querySnapshot = await getDocs(collection(db, 'results'));
+
+  querySnapshot.forEach((doc) => {
+    results.value.push({
+      ...{ id: doc.id },
+      ...doc.data()
+    });
+  });
+};
+
+const usersResults = computed(() => {
+  const data = users.value.map(user => {
+    results.value.forEach(result => {
+      if (user.id === result.iduser) {
+        user.score += result.score;
+      }
+    });
+
+    return user;
+  });
+
+  return data.sort((a, b) => b.score - a.score);
+});
+
+onMounted(() => {
+  getUsers();
 });
 </script>
 
@@ -42,23 +64,16 @@ onMounted(async () => {
       size="lg"
       text="Ranking"
     />
-    
-    <div
-      v-if="isLoading"
-      class="flex-1 flex flex-col items-center justify-center w-full"
-    >
-      <Loader color="primary" />
-    </div>
 
     <Text
-      v-if="!isLoading && !users.length"
+      v-if="!isLoading && !usersResults.length"
       text="Nenhum participante cadastrado ainda :("
       class="text-center"
     />
 
     <div class="table w-full mt-5 mb-20">
       <table
-        v-if="!isLoading && users.length"
+        v-if="usersResults && usersResults.length"
         class="w-full text-sm"
       >
         <thead class="text-dark font-bold uppercase">
@@ -85,7 +100,7 @@ onMounted(async () => {
         </thead>
         <tbody>
           <tr
-            v-for="(user, index) in users"
+            v-for="(user, index) in usersResults"
             :key="index"
           >
             <td
@@ -129,6 +144,25 @@ onMounted(async () => {
           </tr>
         </tbody>
       </table>
+
+      <div
+        v-if="!usersResults || !usersResults.length"
+        role="status"
+        class="max-w-md space-y-4 divide-y divide-gray-200 animate-pulse"
+      >
+        <div
+          v-for="(n, index) in 5"
+          :key="index"
+          class="flex items-center justify-between pt-4"
+        >
+          <div>
+            <div class="h-2.5 bg-gray-300 rounded-full w-24 mb-2.5" />
+            <div class="w-32 h-2 bg-gray-200 rounded-full" />
+          </div>
+          <div class="h-2.5 bg-gray-300 rounded-full w-12" />
+        </div>
+        <span class="sr-only">Loading...</span>
+      </div>
     </div>
 
     <div class="fixed left-0 bottom-0 w-full p-[5%]">

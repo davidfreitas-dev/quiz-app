@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/services/firebase-firestore';
 import { useStorage } from '@/use/useStorage';
 import Button from '@/components/Button.vue';
 
@@ -8,10 +10,24 @@ const route = useRoute();
 const router = useRouter();
 const quiz = ref(undefined);
 
-onMounted(async () => {
+const getQuiz = async () => {
   const user = getStorage('user');
 
-  quiz.value = user.quizzes.find(quiz => quiz.id === Number(route.params.id));
+  const q = query(
+    collection(db, 'results'), 
+    where('idquiz', '==', Number(route.params.id)), 
+    where('iduser', '==', user.id)
+  );
+
+  const querySnapshot = await getDocs(q);
+
+  querySnapshot.forEach((doc) => {
+    quiz.value = doc.data();
+  });
+};
+
+onMounted(async () => {
+  getQuiz();
 });
 
 const message = computed(() => {

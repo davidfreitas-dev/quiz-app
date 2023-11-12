@@ -31,9 +31,7 @@ const signInWithGoogle = () => {
           id: result.user.uid,
           email: result.user.email,
           name: result.user.displayName,
-          image: result.user.photoURL,
-          quizzes: [],
-          score: 0
+          image: result.user.photoURL
         };
 
         saveData(userData);
