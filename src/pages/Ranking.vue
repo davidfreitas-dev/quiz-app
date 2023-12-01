@@ -153,13 +153,16 @@ onMounted(() => {
         <div
           v-for="(n, index) in 5"
           :key="index"
-          class="flex items-center justify-between pt-4"
+          class="flex items-center justify-between pt-4 w-full"
         >
-          <div>
-            <div class="h-2.5 bg-gray-300 rounded-full w-24 mb-2.5" />
-            <div class="w-32 h-2 bg-gray-200 rounded-full" />
+          <div class="flex items-center gap-3">
+            <div class="h-8 w-8 rounded-full bg-gray-200" />
+            <div>
+              <div class="h-2.5 bg-gray-300 rounded-full w-24 mb-2.5" />
+              <div class="w-32 h-2 bg-gray-200 rounded-full" />
+            </div>
           </div>
-          <div class="h-2.5 bg-gray-300 rounded-full w-12" />
+          <div class="h-2.5 self-end bg-gray-300 rounded-full w-12" />
         </div>
         <span class="sr-only">Loading...</span>
       </div>
