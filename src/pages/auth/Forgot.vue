@@ -8,6 +8,7 @@ import Text from '@/components/Text.vue';
 import TextInput from '@/components/TextInput.vue';
 import Button from '@/components/Button.vue';
 import Toast from '@/components/Toast.vue';
+import Loader from '@/components/Loader.vue';
 
 const isLoading = ref(false);
 
@@ -81,11 +82,10 @@ const { toast, toastData, handleToast } = useToast();
         />
       </div>
 
-      <Button
-        text="Enviar link de recuperação"
-        :is-loading="isLoading"
-        class="mt-4"
-      />
+      <Button class="mt-4">
+        <Loader v-if="isLoading" />
+        <span v-else>Enviar link de recuperação</span>
+      </Button>
     </form>
 
     <footer class="flex flex-col items-center gap-4 mt-8">

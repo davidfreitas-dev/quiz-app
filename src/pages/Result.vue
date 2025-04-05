@@ -80,9 +80,10 @@ const { getStorage } = useStorage();
 
       <Button
         size="block"
-        text="Voltar ao início"
         @click="router.push('/')"
-      />
+      >
+        Voltar ao início
+      </Button>
     </div>
   </Container>
 </template>

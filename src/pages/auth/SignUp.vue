@@ -13,6 +13,7 @@ import TextInput from '@/components/TextInput.vue';
 import Button from '@/components/Button.vue';
 import GoogleButton from '@/components/GoogleButton.vue';
 import Toast from '@/components/Toast.vue';
+import Loader from '@/components/Loader.vue';
 
 const saveData = async (userData) => {
   setStorage('user', userData);
@@ -131,11 +132,10 @@ const { toast, toastData, handleToast } = useToast();
         />
       </div>
 
-      <Button
-        text="Cadastrar na plataforma"
-        :is-loading="isLoading"
-        class="mt-4"
-      />
+      <Button class="mt-4">
+        <Loader v-if="isLoading" />
+        <span v-else>Cadastrar na plataforma</span>
+      </Button>
 
       <GoogleButton />
     </form>

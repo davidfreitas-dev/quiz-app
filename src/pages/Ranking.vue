@@ -172,9 +172,10 @@ onMounted(() => {
     <div class="fixed left-0 bottom-0 w-full p-[5%]">
       <Button
         size="block"
-        text="Voltar ao início"
         @click="router.push('/')"
-      />
+      >
+        Voltar ao início
+      </Button>
     </div>
   </Container>
 </template>

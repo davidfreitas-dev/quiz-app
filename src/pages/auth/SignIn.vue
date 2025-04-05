@@ -14,6 +14,7 @@ import TextInput from '@/components/TextInput.vue';
 import Button from '@/components/Button.vue';
 import GoogleButton from '@/components/GoogleButton.vue';
 import Toast from '@/components/Toast.vue';
+import Loader from '@/components/Loader.vue';
 
 const getUser = async (userId) => {
   const docSnap = await getDoc(doc(db, 'users', userId));  
@@ -119,11 +120,10 @@ const { toast, toastData, handleToast } = useToast();
         />
       </div>
 
-      <Button
-        text="Entrar na plataforma"
-        :is-loading="isLoading"
-        class="mt-4"
-      />
+      <Button class="mt-4">
+        <Loader v-if="isLoading" />
+        <span v-else>Entrar na plataforma</span>
+      </Button>
 
       <GoogleButton />
     </form>
