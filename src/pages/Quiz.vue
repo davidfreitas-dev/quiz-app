@@ -6,6 +6,12 @@ import { db } from '@/services/firebase-firestore';
 import { useStorage } from '@/use/useStorage';
 import { useToast } from '@/use/useToast';
 import { CheckCircleIcon } from '@heroicons/vue/24/solid';
+import {
+  RadioGroup,
+  RadioGroupLabel,
+  RadioGroupOption,
+} from '@headlessui/vue';
+
 import Container from '@/components/Container.vue';
 import Progressbar from '@/components/Progressbar.vue';
 import Heading from '@/components/Heading.vue';
@@ -15,21 +21,29 @@ import Actions from '@/components/Actions.vue';
 import Toast from '@/components/Toast.vue';
 
 const route = useRoute();
+const router = useRouter();
+
+const { getStorage } = useStorage();
+const { toast, toastData, handleToast } = useToast();
 
 const user = ref(undefined);
+const isQuizDone = ref(false);
+const isLoading = ref(true);
+const quiz = ref(undefined);
+const currentQuestionIndex = ref(0);
+const score = ref(0);
+const userAnswers = ref([]);
 
 const getUser = () => {
   user.value = getStorage('user');
 };
 
-const isQuizDone = ref(false);
-
 const checkQuizDone = async () => {
   let quizData = null;
 
   const q = query(
-    collection(db, 'results'), 
-    where('idquiz', '==', Number(route.params.id)), 
+    collection(db, 'results'),
+    where('idquiz', '==', Number(route.params.id)),
     where('iduser', '==', user.value.id)
   );
 
@@ -38,33 +52,22 @@ const checkQuizDone = async () => {
   querySnapshot.forEach((doc) => {
     quizData = doc.data();
   });
-  
+
   isQuizDone.value = quizData ? true : false;
 
-  if (isQuizDone.value) {
-    if (!quizData.answers.length) return;
-
-    quiz.value.questions.forEach(question => {
-      const answer = quizData.answers.find(a => a.id === question.id);
-      
-      question.options.forEach(option => {
-        if (option.option === answer.option) {
-          option.selected = true;
-        }
+  if (isQuizDone.value && quizData.answers.length) {
+    quiz.value.questions.forEach((question) => {
+      const answer = quizData.answers.find((a) => a.id === question.id);
+      question.options.forEach((option) => {
+        option.selected = option.option === answer.option;
       });
     });
   }
 };
 
-const quiz = ref(undefined);
-
-const isLoading = ref(true);
-
 const getQuiz = async () => {
   const quizId = Number(route.params.id);
-  
   const q = query(collection(db, 'quizzes'), where('id', '==', quizId));
-
   const querySnapshot = await getDocs(q);
 
   querySnapshot.forEach((doc) => {
@@ -72,7 +75,6 @@ const getQuiz = async () => {
   });
 
   await checkQuizDone();
-
   isLoading.value = false;
 };
 
@@ -81,27 +83,23 @@ onMounted(async () => {
   getQuiz();
 });
 
-const currentQuestionIndex = ref(0);
-
-const selectQuizOption = (index) => {
+const selectQuizOptionByValue = (value) => {
   if (isQuizDone.value) return;
-
   const currentQuestion = quiz.value.questions[currentQuestionIndex.value];
-
-  currentQuestion.options.forEach(option => {
-    option.selected = false;
+  currentQuestion.options.forEach((option) => {
+    option.selected = option.option === value;
   });
-
-  currentQuestion.options[index].selected = true;
 };
 
-const score = ref(0);
-
-const userAnswers = ref([]);
+const getCurrentSelectedOption = () => {
+  const currentQuestion = quiz.value.questions[currentQuestionIndex.value];
+  const selected = currentQuestion.options.find((o) => o.selected);
+  return selected ? selected.option : null;
+};
 
 const checkAnswers = async () => {
-  quiz.value.questions.forEach(question => {
-    question.options.forEach(option => {
+  quiz.value.questions.forEach((question) => {
+    question.options.forEach((option) => {
       if (option.selected) {
         if (option.option === question.answer) {
           score.value++;
@@ -110,7 +108,7 @@ const checkAnswers = async () => {
         userAnswers.value.push({
           id: question.id,
           option: option.option,
-          desc: option.desc
+          desc: option.desc,
         });
       }
     });
@@ -124,7 +122,7 @@ const saveData = async () => {
     answers: userAnswers.value,
     idquiz: quiz.value.id,
     iduser: user.value.id,
-    score: score.value
+    score: score.value,
   });
 };
 
@@ -141,12 +139,9 @@ const isLastQuestion = computed(() => {
   return currentQuestionIndex.value === quiz.value.questions.length - 1;
 });
 
-const router = useRouter();
-
 const nextQuestion = async () => {
   const currentQuestion = quiz.value.questions[currentQuestionIndex.value];
-
-  const hasSelectedOption = currentQuestion.options.some(option => option.selected);
+  const hasSelectedOption = currentQuestion.options.some((option) => option.selected);
 
   if (!isQuizDone.value && !hasSelectedOption) {
     handleToast('error', 'Selecione uma opção antes de continuar');
@@ -156,8 +151,8 @@ const nextQuestion = async () => {
   if (!isLastQuestion.value) {
     currentQuestionIndex.value++;
     return;
-  } 
-  
+  }
+
   if (isQuizDone.value) {
     router.push('/');
     return;
@@ -171,12 +166,8 @@ const nextQuestion = async () => {
 
 const progress = computed(() => {
   const questionsCount = quiz.value.questions.length;
-
   return (100 / questionsCount) * (currentQuestionIndex.value + 1);
 });
-
-const { getStorage } = useStorage();
-const { toast, toastData, handleToast } = useToast();
 </script>
 
 <template>
@@ -211,36 +202,52 @@ const { toast, toastData, handleToast } = useToast();
         :text="quiz.questions[currentQuestionIndex].question"
       />
 
-      <div class="options flex flex-1 flex-col items-start w-full gap-3">
-        <template
-          v-for="(item, index) in quiz.questions[currentQuestionIndex].options"
+      <!-- Headless UI RadioGroup para opções -->
+      <RadioGroup
+        :model-value="getCurrentSelectedOption()"
+        @update:model-value="selectQuizOptionByValue"
+        class="flex flex-1 flex-col items-start w-full gap-3"
+      >
+        <RadioGroupLabel class="sr-only">
+          Escolha uma opção
+        </RadioGroupLabel>
+
+        <RadioGroupOption
+          v-for="(option, index) in quiz.questions[currentQuestionIndex].options"
           :key="index"
+          :value="option.option"
+          v-slot="{ checked }"
+          as="template"
         >
           <div
-            class="option flex items-center gap-2 px-5 w-full h-14 rounded-2xl transition-colors text-dark bg-light"
-            :class="{ 
-              'text-primary bg-primary-light': item.selected,
-              'text-success bg-success-light': item.option === quiz.questions[currentQuestionIndex].answer && isQuizDone,
-            }"
-            @click="selectQuizOption(index)"
+            class="flex items-center gap-2 px-5 w-full h-14 rounded-2xl transition-colors text-dark"
+            :class="[
+              checked ? 'bg-primary-light text-primary' : 'bg-light',
+              isQuizDone && option.option === quiz.questions[currentQuestionIndex].answer
+                ? 'text-success bg-success-light'
+                : '',
+            ]"
           >
             <CheckCircleIcon
-              v-if="item.selected"
+              v-if="checked"
               class="h-6 w-6"
             />
 
             <span
               v-else
               class="h-5 w-5 mr-1 border-2 border-secondary-light rounded-full"
-              :class="{ 'border-success border-opacity-20': item.option === quiz.questions[currentQuestionIndex].answer && isQuizDone }"
+              :class="{
+                'border-success border-opacity-20':
+                  isQuizDone && option.option === quiz.questions[currentQuestionIndex].answer,
+              }"
             />
 
             <label class="ml-2 text-sm font-semibold">
-              {{ item.desc }}
+              {{ option.desc }}
             </label>
           </div>
-        </template>
-      </div>
+        </RadioGroupOption>
+      </RadioGroup>
 
       <Actions
         class="mt-5"
