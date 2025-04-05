@@ -1,5 +1,6 @@
 <script setup>
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/vue/24/solid';
+import Button from '@/components/Button.vue';
 
 const emit = defineEmits(['onHandleLeft', 'onHandleRight']);
 
@@ -17,9 +18,9 @@ const props = defineProps({
 
 <template>
   <div class="actions flex justify-between items-center gap-5 w-full">
-    <button
-      type="button"
-      class="p-3 w-1/2 text-sm font-semibold text-primary inline-flex items-center justify-between bg-white border-2 border-primary focus:outline-none rounded-xl text-center transition-all duration-200 ease-in active:scale-95 active:opacity-80 cursor-pointer disabled:cursor-not-allowed"
+    <Button
+      class="w-1/2 justify-between"
+      color="outline"
       @click="emit('onHandleLeft')"
     >
       <ChevronLeftIcon class="h-5 w-5" />
@@ -27,18 +28,18 @@ const props = defineProps({
       {{ textLeft }}
 
       <span class="h-5 w-5" />
-    </button>
+    </Button>
 
-    <button
-      type="button"
-      class="p-3 w-1/2 text-sm font-semibold text-white inline-flex items-center justify-between bg-primary border-2 border-primary focus:outline-none rounded-xl text-center transition-all duration-200 ease-in active:scale-95 active:opacity-80 cursor-pointer disabled:cursor-not-allowed"
+    <Button
+      class="w-1/2 justify-between"
+      color="primary"
       @click="emit('onHandleRight')"
     >
       <span class="h-5 w-5" />
 
       {{ textRight }}
-      
+
       <ChevronRightIcon class="h-5 w-5" />
-    </button>
+    </Button>
   </div>
 </template>
