@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
+import Container from '@/components/Container.vue';
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
 import Button from '@/components/Button.vue';
@@ -59,7 +60,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col items-start w-full p-7">
+  <Container>
     <Heading
       size="lg"
       text="Ranking"
@@ -175,5 +176,5 @@ onMounted(() => {
         @click="router.push('/')"
       />
     </div>
-  </div>
+  </Container>
 </template>

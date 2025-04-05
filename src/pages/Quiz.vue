@@ -6,6 +6,7 @@ import { db } from '@/services/firebase-firestore';
 import { useStorage } from '@/use/useStorage';
 import { useToast } from '@/use/useToast';
 import { CheckCircleIcon } from '@heroicons/vue/24/solid';
+import Container from '@/components/Container.vue';
 import Progressbar from '@/components/Progressbar.vue';
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
@@ -179,77 +180,80 @@ const { toast, toastData, handleToast } = useToast();
 </script>
 
 <template>
-  <div
-    v-if="isLoading"
-    class="flex flex-col items-center justify-center w-full h-screen"
-  >
-    <Loader color="primary" />
-  </div>
-
-  <div
-    v-if="!isLoading && quiz"
-    class="quiz-container flex flex-col items-start w-full min-h-screen p-7"
-  >
-    <Text
-      class="mb-5"
-      size="sm"
-      weight="semibold"
-      :text="`Prova ${quiz.id} - Questão ${quiz.questions[currentQuestionIndex].id} de ${quiz.questions.length}`"
-    />
-
-    <Progressbar
-      class="mb-5"
-      :progress="progress"
-    />
-
-    <Heading
-      class="mb-5"
-      size="md"
-      weight="bold"
-      :text="quiz.questions[currentQuestionIndex].question"
-    />
-
-    <div class="options flex flex-1 flex-col items-start w-full gap-3">
-      <template
-        v-for="(item, index) in quiz.questions[currentQuestionIndex].options"
-        :key="index"
-      >
-        <div
-          class="option flex items-center gap-2 px-5 w-full h-14 rounded-2xl transition-colors text-dark bg-light"
-          :class="{ 
-            'text-primary bg-primary-light': item.selected,
-            'text-success bg-success-light': item.option === quiz.questions[currentQuestionIndex].answer && isQuizDone,
-          }"
-          @click="selectQuizOption(index)"
-        >
-          <CheckCircleIcon
-            v-if="item.selected"
-            class="h-6 w-6"
-          />
-
-          <span
-            v-else
-            class="h-5 w-5 mr-1 border-2 border-secondary-light rounded-full"
-            :class="{ 'border-success border-opacity-20': item.option === quiz.questions[currentQuestionIndex].answer && isQuizDone }"
-          />
-
-          <label class="ml-2 text-sm font-semibold">
-            {{ item.desc }}
-          </label>
-        </div>
-      </template>
+  <Container>
+    <div
+      v-if="isLoading"
+      class="flex flex-col items-center justify-center w-full h-screen"
+    >
+      <Loader color="primary" />
     </div>
 
-    <Actions
-      :text-left="currentQuestionIndex === 0 ? 'Voltar' : 'Anterior'"
-      :text-right="isLastQuestion ? 'Finalizar' : 'Próxima'"
-      @on-handle-left="previousQuestion"
-      @on-handle-right="nextQuestion"
-    />
+    <div
+      v-if="!isLoading && quiz"
+      class="quiz-container flex flex-col items-start w-full"
+    >
+      <Text
+        class="mb-5"
+        size="sm"
+        weight="semibold"
+        :text="`Prova ${quiz.id} - Questão ${quiz.questions[currentQuestionIndex].id} de ${quiz.questions.length}`"
+      />
 
-    <Toast
-      ref="toast"
-      :toast-data="toastData"
-    />
-  </div>
+      <Progressbar
+        class="mb-5"
+        :progress="progress"
+      />
+
+      <Heading
+        class="mb-5"
+        size="md"
+        weight="bold"
+        :text="quiz.questions[currentQuestionIndex].question"
+      />
+
+      <div class="options flex flex-1 flex-col items-start w-full gap-3">
+        <template
+          v-for="(item, index) in quiz.questions[currentQuestionIndex].options"
+          :key="index"
+        >
+          <div
+            class="option flex items-center gap-2 px-5 w-full h-14 rounded-2xl transition-colors text-dark bg-light"
+            :class="{ 
+              'text-primary bg-primary-light': item.selected,
+              'text-success bg-success-light': item.option === quiz.questions[currentQuestionIndex].answer && isQuizDone,
+            }"
+            @click="selectQuizOption(index)"
+          >
+            <CheckCircleIcon
+              v-if="item.selected"
+              class="h-6 w-6"
+            />
+
+            <span
+              v-else
+              class="h-5 w-5 mr-1 border-2 border-secondary-light rounded-full"
+              :class="{ 'border-success border-opacity-20': item.option === quiz.questions[currentQuestionIndex].answer && isQuizDone }"
+            />
+
+            <label class="ml-2 text-sm font-semibold">
+              {{ item.desc }}
+            </label>
+          </div>
+        </template>
+      </div>
+
+      <Actions
+        class="mt-5"
+        :text-left="currentQuestionIndex === 0 ? 'Voltar' : 'Anterior'"
+        :text-right="isLastQuestion ? 'Finalizar' : 'Próxima'"
+        @on-handle-left="previousQuestion"
+        @on-handle-right="nextQuestion"
+      />
+
+      <Toast
+        ref="toast"
+        :toast-data="toastData"
+      />
+    </div>
+  </Container>
 </template>

@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
 import { useStorage } from '@/use/useStorage';
+import Container from '@/components/Container.vue';
 import Button from '@/components/Button.vue';
 
 const route = useRoute();
@@ -64,22 +65,24 @@ const { getStorage } = useStorage();
 </script>
 
 <template>
-  <div
-    v-if="quiz"
-    class="flex flex-col items-center gap-3 p-7 min-h-screen"
-  >
-    <div class="text-9xl mt-10">
-      {{ emoji }}
-    </div>
+  <Container>
+    <div
+      v-if="quiz"
+      class="flex flex-col items-center gap-3 min-h-screen"
+    >
+      <div class="text-9xl mt-10">
+        {{ emoji }}
+      </div>
 
-    <div class="flex-1 text-5xl text-center font-extrabold leading-tight">
-      {{ message }} Você tirou <span class="text-success">Nota {{ quiz.score }}</span>
-    </div>
+      <div class="flex-1 text-5xl text-center font-extrabold leading-tight">
+        {{ message }} Você tirou <span class="text-success">Nota {{ quiz.score }}</span>
+      </div>
 
-    <Button
-      size="block"
-      text="Voltar ao início"
-      @click="router.push('/')"
-    />
-  </div>
+      <Button
+        size="block"
+        text="Voltar ao início"
+        @click="router.push('/')"
+      />
+    </div>
+  </Container>
 </template>

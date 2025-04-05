@@ -6,6 +6,7 @@ import { db } from '@/services/firebase-firestore';
 import { useAuth } from '@/use/useAuth';
 import { useStorage } from '@/use/useStorage';
 import { ChevronRightIcon } from '@heroicons/vue/24/solid';
+import Container from '@/components/Container.vue';
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
 import Loader from '@/components/Loader.vue';
@@ -79,9 +80,10 @@ const { getStorage, removeStorage } = useStorage();
 </script>
 
 <template>
-  <div class="flex flex-col items-start gap-5 w-full min-h-screen p-7">
+  <Container>
     <Heading
       size="md"
+      class="mb-5"
       text="Selecione a prova que deseja iniciar."
     />
 
@@ -130,10 +132,11 @@ const { getStorage, removeStorage } = useStorage();
     </div>
 
     <Actions
+      class="mt-5"
       text-left="Sair"
       text-right="Ranking"
       @on-handle-left="signOut"
       @on-handle-right="router.push('/ranking')"
     />
-  </div>
+  </Container>
 </template>
