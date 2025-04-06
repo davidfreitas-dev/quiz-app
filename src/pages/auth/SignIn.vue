@@ -7,7 +7,6 @@ import { useAuth } from '@/use/useAuth';
 import { useException } from '@/use/useException';
 import { useStorage } from '@/use/useStorage';
 import { useToast } from '@/use/useToast';
-import Container from '@/components/Container.vue';
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
 import TextInput from '@/components/TextInput.vue';

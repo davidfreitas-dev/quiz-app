@@ -1,91 +1,117 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+// 1. External libs
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+
+// 2. Internal services & composables
 import { db } from '@/services/firebase-firestore';
 import { useAuth } from '@/use/useAuth';
+import { useToast } from '@/use/useToast';
 import { useStorage } from '@/use/useStorage';
+
+// 3. UI components
 import { ChevronRightIcon } from '@heroicons/vue/24/solid';
 import Container from '@/components/Container.vue';
 import Heading from '@/components/Heading.vue';
+import UserStats from '@/components/UserStats.vue';
+import Avatar from '@/components/Avatar.vue';
 import Text from '@/components/Text.vue';
 import Loader from '@/components/Loader.vue';
 import Actions from '@/components/Actions.vue';
 
+// 4. Composables
+const router = useRouter();
+const { logOut } = useAuth();
+const { getStorage, removeStorage } = useStorage();
+const { toast, toastData, handleToast } = useToast();
+
+const user = ref(null);
 const quizzes = ref([]);
+const isLoading = ref(true);
+
+const firstName = computed(() => {
+  return user.value?.name?.split(' ')[0] || 'Visitante';
+});
 
 const checkQuizzes = async () => {
-  let userQuizzes = [];
+  if (!user.value) return;
 
-  const user = getStorage('user');
+  try {
+    const q = query(collection(db, 'results'), where('iduser', '==', user.value.id));
+    const querySnapshot = await getDocs(q);
 
-  const q = query(collection(db, 'results'), where('iduser', '==', user.id));
+    const userQuizzes = [];
+    querySnapshot.forEach((doc) => {
+      userQuizzes.push(doc.data());
+    });
 
-  const querySnapshot = await getDocs(q);
-
-  querySnapshot.forEach((doc) => {
-    userQuizzes.push(doc.data());
-  });
-
-  if (userQuizzes.length) {
-    userQuizzes.forEach(el => {
+    if (userQuizzes.length) {
+      const quizMap = new Map(userQuizzes.map(el => [el.idquiz, el.score]));
       quizzes.value.forEach(quiz => {
-        if (quiz.id === el.idquiz) {
-          quiz.score = el.score;
+        if (quizMap.has(quiz.id)) {
+          quiz.score = quizMap.get(quiz.id);
         }
       });
-    });
-  }  
+    }
+  } catch (error) {
+    console.error('Erro ao buscar quizzes do usuário: ', error);
+    handleToast('error', 'Não foi possível carregar os quizzes. Tente novamente mais tarde.');
+  }
 };
 
-const getQuizzes = async () => {
-  let data = [];
 
+const fetchQuizzes = async () => {
   const querySnapshot = await getDocs(collection(db, 'quizzes'));
+  return querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  })).sort((a, b) => a.id - b.id);
+};
 
-  querySnapshot.forEach((doc) => {
-    data.push({
-      ...{ id: doc.id },
-      ...doc.data()
-    });
-  });
-
-  quizzes.value = data.sort((a, b) => a.id - b.id);
-
-  checkQuizzes();
-  
+const loadQuizzes = async () => {
+  quizzes.value = await fetchQuizzes();
+  await checkQuizzes();
   isLoading.value = false;
 };
 
-const isLoading = ref(true);
-
-onMounted(async () => {
-  await getQuizzes();
-});
-
-const router = useRouter();
-
 const signOut = async () => {
   const response = await logOut();
-  
-  if (response.status == 'success') {
+  if (response.status === 'success') {
     removeStorage('user');
-
     router.push('/signin');
   }
 };
 
-const { logOut } = useAuth();
-const { getStorage, removeStorage } = useStorage();
+onMounted(async () => {
+  user.value = getStorage('user');
+  await loadQuizzes();
+});
 </script>
 
 <template>
   <Container>
-    <Heading
-      size="md"
-      class="mb-5"
-      text="Selecione a prova que deseja iniciar."
+    <div class="flex justify-between items-center w-full mb-5">
+      <div class="flex flex-col items-start">
+        <Heading
+          size="lg"
+          :text="`👋 Olá ${firstName},`"
+        />
+
+        <Text
+          text="É bom vê-lo novamente!"
+          class="text-center mt-1"
+        />
+      </div>
+
+      <Avatar :image="user?.image" />
+    </div>
+
+    <UserStats
+      :points="2300"
+      :ranking="32"
     />
+
 
     <div
       v-if="isLoading"
@@ -137,6 +163,11 @@ const { getStorage, removeStorage } = useStorage();
       text-right="Ranking"
       @on-handle-left="signOut"
       @on-handle-right="router.push('/ranking')"
+    />
+    
+    <Toast
+      ref="toast"
+      :toast-data="toastData"
     />
   </Container>
 </template>
