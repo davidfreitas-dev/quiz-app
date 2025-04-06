@@ -42,7 +42,7 @@ const signOut = async () => {
 };
 
 onMounted(async () => {
-  await quizStore.loadQuizzes();
+  await quizStore.fetchAllQuizzesWithScores();
 });
 </script>
 
@@ -55,10 +55,7 @@ onMounted(async () => {
       <Loader color="primary" />
     </div>
 
-    <div
-      v-if="!isLoading && user"
-      class="flex justify-between items-center w-full mb-5"
-    >
+    <div class="flex justify-between items-center w-full mb-5">
       <div class="flex flex-col items-start">
         <Heading
           size="lg"
@@ -82,13 +79,14 @@ onMounted(async () => {
 
     <Text
       v-if="!isLoading && !quizzes.length"
-      text="Nenhuma prova no sistema ainda :("
-      class="text-center"
+      class="mx-auto my-7"
+      text="Nenhum quizz disponível ainda :("
+      size="md"
     />
 
     <div
       v-if="!isLoading && quizzes.length"
-      class="quizzes flex flex-1 flex-col items-start w-full gap-3"
+      class="quizzes flex flex-1 flex-col items-start w-full gap-3 my-7"
     >
       <template
         v-for="(quiz, index) in quizzes"

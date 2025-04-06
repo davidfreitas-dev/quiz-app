@@ -13,7 +13,7 @@ export function useQuiz() {
   const { getStorage } = useStorage();
   const { toastData, handleToast } = useToast();
   const { quiz, isLoading, isQuizDone } = storeToRefs(quizStore);
-  const { loadQuizById, checkQuizDone, saveQuizResult } = quizStore;
+  const { fetchQuizById, checkQuizDone, saveQuizResult } = quizStore;
 
   const user = ref(undefined);
   const userAnswers = ref([]);
@@ -37,7 +37,7 @@ export function useQuiz() {
 
   const fetchQuiz = async () => {
     const quizId = Number(route.params.id);
-    await loadQuizById(quizId);
+    await fetchQuizById(quizId);
     await checkQuizDone(quizId, user.value.id);
   };
 

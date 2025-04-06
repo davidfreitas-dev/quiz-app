@@ -5,11 +5,17 @@ import { db } from '@/services/firebase-firestore';
 import { useStorage } from '@/use/useStorage';
 
 export const useQuizStore = defineStore('quiz', () => {
-  const user = ref(useStorage().getStorage('user'));
+  const user = ref(null);
   const quiz = ref(null);
   const quizzes = ref([]);
   const isLoading = ref(true);
   const isQuizDone = ref(false);
+
+  const initUser = () => {
+    user.value = useStorage().getStorage('user');
+  };
+
+  initUser();
 
   const totalScore = computed(() =>
     quizzes.value.reduce((acc, quiz) => acc + (quiz.score || 0), 0)
@@ -19,27 +25,36 @@ export const useQuizStore = defineStore('quiz', () => {
     quizzes.value.filter(q => q.score >= 0).length
   );
 
-  const loadQuizById = async (id) => {
+  const withLoading = async (fn) => {
     isLoading.value = true;
     try {
-      const q = query(collection(db, 'quizzes'), where('id', '==', Number(id)));
-      const querySnapshot = await getDocs(q);
-  
-      for (const docSnap of querySnapshot.docs) {
-        quiz.value = docSnap.data();
-      }
-
-      console.log('Quiz selecionado: ', quiz.value);
+      await fn();
     } catch (err) {
-      console.error('Erro ao carregar quiz:', err);
+      console.error('Erro na operação:', err);
     } finally {
       isLoading.value = false;
     }
   };
 
-  const loadQuizzes = async () => {
-    isLoading.value = true;
-    try {
+  const markSelectedOptions = (questions, answers) => {
+    for (const question of questions) {
+      const answer = answers.find(a => a.id === question.id);
+      for (const option of question.options) {
+        option.selected = option.option === answer.option;
+      }
+    }
+  };
+
+  const fetchQuizById = async (id) => {
+    await withLoading(async () => {
+      const q = query(collection(db, 'quizzes'), where('id', '==', Number(id)));
+      const querySnapshot = await getDocs(q);
+      quiz.value = querySnapshot.docs[0]?.data() || null;
+    });
+  };
+
+  const fetchAllQuizzesWithScores = async () => {
+    await withLoading(async () => {
       const quizSnapshot = await getDocs(collection(db, 'quizzes'));
       const quizList = quizSnapshot.docs.map(doc => ({
         id: doc.id,
@@ -61,16 +76,10 @@ export const useQuizStore = defineStore('quiz', () => {
         ...quiz,
         score: resultMap.get(quiz.id) ?? null
       })).sort((a, b) => a.id - b.id);
-
-      console.log('Quizzes carregados: ', quizzes.value);
-    } catch (err) {
-      console.error('Erro ao carregar quizzes:', err);
-    } finally {
-      isLoading.value = false;
-    }
+    });
   };
 
-  const checkQuizDone = async (quizId, userId) => {
+  const markQuizAsCompleted = async (quizId, userId) => {
     try {
       const q = query(
         collection(db, 'results'),
@@ -78,28 +87,19 @@ export const useQuizStore = defineStore('quiz', () => {
         where('iduser', '==', userId)
       );
       const querySnapshot = await getDocs(q);
-      let quizData = null;
-
-      for (const docSnap of querySnapshot.docs) {
-        quizData = docSnap.data();
-      }
+      const quizData = querySnapshot.docs[0]?.data() || null;
 
       isQuizDone.value = !!quizData;
 
       if (quizData?.answers?.length) {
-        for (const question of quiz.value.questions) {
-          const answer = quizData.answers.find((a) => a.id === question.id);
-          for (const option of question.options) {
-            option.selected = option.option === answer.option;
-          }
-        }
+        markSelectedOptions(quiz.value.questions, quizData.answers);
       }
     } catch (err) {
       console.error('Erro ao verificar conclusão do quiz:', err);
     }
   };
 
-  const saveQuizResult = async ({ quizId, userId, userName, answers, score }) => {
+  const submitQuizResult = async ({ quizId, userId, userName, answers, score }) => {
     try {
       const docRef = doc(collection(db, 'results'));
       await setDoc(docRef, {
@@ -119,11 +119,13 @@ export const useQuizStore = defineStore('quiz', () => {
     quiz,
     quizzes,
     isLoading,
+    isQuizDone,
     totalScore,
     completedCount,
-    loadQuizzes,
-    loadQuizById,
-    checkQuizDone,
-    saveQuizResult
+    initUser,
+    fetchQuizById,
+    fetchAllQuizzesWithScores,
+    markQuizAsCompleted,
+    submitQuizResult
   };
 });

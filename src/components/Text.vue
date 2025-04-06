@@ -16,17 +16,16 @@ const props = defineProps({
 </script>
 
 <template>
-  <span
+  <p
     :class="{
       'text-sm': size === 'sm',
       'text-md': size === 'md',
       'text-lg': size === 'lg',
-      'text-2xl': size === 'xl',
       'font-bold': weight === 'bold',
       'font-semibold': weight === 'semibold',
     }"
     class="text-secondary font-sans leading-tight select-none"
   >
     {{ text }}
-  </span>
+  </p>
 </template>
