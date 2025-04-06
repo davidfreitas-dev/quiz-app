@@ -20,7 +20,7 @@ const {
   progress,
   toastData,
   getUser,
-  getQuiz,
+  fetchQuiz,
   selectQuizOptionByValue,
   getCurrentSelectedOption,
   previousQuestion,
@@ -30,7 +30,7 @@ const {
 
 onMounted(async () => {
   getUser();
-  await getQuiz();
+  await fetchQuiz();
 });
 </script>
 
@@ -48,8 +48,9 @@ onMounted(async () => {
       class="quiz-container flex flex-col items-start w-full"
     >
       <QuizHeader
+        v-if="currentQuestion"
         :quiz-id="quiz.id"
-        :question-id="currentQuestion.id"
+        :question-id="currentQuestion?.id"
         :total-questions="quiz.questions.length"
         :question-text="currentQuestion.question"
         :progress="progress"

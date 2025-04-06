@@ -1,6 +1,7 @@
 <script setup>
 // External libs
 import { computed, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { useQuizStore } from '@/stores/quizStore';
 
@@ -26,13 +27,7 @@ const quizStore = useQuizStore();
 const { logOut } = useAuth();
 const { removeStorage } = useStorage();
 const { toast, toastData, handleToast } = useToast();
-
-// Reativos da store (como computed para manter a reatividade)
-const user = computed(() => quizStore.user);
-const quizzes = computed(() => quizStore.quizzes);
-const isLoading = computed(() => quizStore.isLoading);
-const totalScore = computed(() => quizStore.totalScore);
-const completedCount = computed(() => quizStore.completedCount);
+const { user, quizzes, isLoading, totalScore, completedCount } = storeToRefs(quizStore);
 
 const firstName = computed(() => {
   return user.value?.name?.split(' ')[0] || 'Visitante';

@@ -1,27 +1,35 @@
 import { ref, computed } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import { collection, query, where, doc, setDoc, getDocs } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
+import { useQuizStore } from '@/stores/quizStore';
 import { useStorage } from '@/use/useStorage';
 import { useToast } from '@/use/useToast';
 
 export function useQuiz() {
   const route = useRoute();
   const router = useRouter();
-  
+  const quizStore = useQuizStore();
+
   const { getStorage } = useStorage();
   const { toastData, handleToast } = useToast();
+  const { quiz, isLoading } = storeToRefs(quizStore);
+  const { loadQuizById } = quizStore;
 
   const user = ref(undefined);
-  const isQuizDone = ref(false);
-  const isLoading = ref(true);
-  const quiz = ref(undefined);
-  const currentQuestionIndex = ref(0);
-  const score = ref(0);
   const userAnswers = ref([]);
+  const currentQuestionIndex = ref(0);
+  const isQuizDone = ref(false);
+  const score = ref(0);
 
-  const currentQuestion = computed(() => quiz.value?.questions[currentQuestionIndex.value]);
   const isLastQuestion = computed(() => currentQuestionIndex.value === quiz.value.questions.length - 1);
+  
+  const currentQuestion = computed(() => {
+    if (!quiz.value || !quiz.value.questions) return null;
+    return quiz.value.questions[currentQuestionIndex.value];
+  });
+  
   const progress = computed(() => {
     const total = quiz.value.questions.length;
     return (100 / total) * (currentQuestionIndex.value + 1);
@@ -56,17 +64,10 @@ export function useQuiz() {
     }
   };
 
-  const getQuiz = async () => {
+  const fetchQuiz = async () => {
     const quizId = Number(route.params.id);
-    const q = query(collection(db, 'quizzes'), where('id', '==', quizId));
-    const querySnapshot = await getDocs(q);
-
-    for (const docSnap of querySnapshot.docs) {
-      quiz.value = docSnap.data();
-    }
-
+    await loadQuizById(quizId);
     await checkQuizDone();
-    isLoading.value = false;
   };
 
   const selectQuizOptionByValue = (value) => {
@@ -159,7 +160,7 @@ export function useQuiz() {
     progress,
     toastData,
     getUser,
-    getQuiz,
+    fetchQuiz,
     selectQuizOptionByValue,
     getCurrentSelectedOption,
     previousQuestion,

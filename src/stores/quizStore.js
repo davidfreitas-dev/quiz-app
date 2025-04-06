@@ -27,6 +27,8 @@ export const useQuizStore = defineStore('quiz', () => {
       for (const docSnap of querySnapshot.docs) {
         quiz.value = docSnap.data();
       }
+
+      console.log('Quiz selecionado: ', quiz.value);
     } catch (err) {
       console.error('Erro ao carregar quiz:', err);
     } finally {
@@ -58,6 +60,8 @@ export const useQuizStore = defineStore('quiz', () => {
         ...quiz,
         score: resultMap.get(quiz.id) ?? null
       })).sort((a, b) => a.id - b.id);
+
+      console.log('Quizzes carregados: ', quizzes.value);
     } catch (err) {
       console.error('Erro ao carregar quizzes:', err);
     } finally {
