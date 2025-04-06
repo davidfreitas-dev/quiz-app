@@ -13,23 +13,24 @@ import Toast from '@/components/Toast.vue';
 const {
   quiz,
   isLoading,
+  isQuizDone,
   currentQuestionIndex,
   currentQuestion,
-  isQuizDone,
   isLastQuestion,
   progress,
+  toast,
   toastData,
-  getUser,
+  loadUserFromStorage,
   fetchQuiz,
-  selectQuizOptionByValue,
+  selectOptionByValue,
   getCurrentSelectedOption,
-  previousQuestion,
-  nextQuestion,
-  getOptionClass,
+  goToPreviousQuestion,
+  goToNextQuestion,
+  computeOptionClass,
 } = useQuiz();
 
 onMounted(async () => {
-  getUser();
+  loadUserFromStorage();
   await fetchQuiz();
 });
 </script>
@@ -58,7 +59,7 @@ onMounted(async () => {
       
       <RadioGroup
         :model-value="getCurrentSelectedOption()"
-        @update:model-value="selectQuizOptionByValue"
+        @update:model-value="selectOptionByValue"
         class="flex flex-1 flex-col items-start w-full gap-3"
       >
         <RadioGroupLabel class="sr-only">
@@ -77,7 +78,7 @@ onMounted(async () => {
             :checked="checked"
             :is-quiz-done="isQuizDone"
             :correct-answer="currentQuestion.answer"
-            :get-option-class="getOptionClass"
+            :get-option-class="computeOptionClass"
           />
         </RadioGroupOption>
       </RadioGroup>
@@ -86,8 +87,8 @@ onMounted(async () => {
         class="mt-5"
         :text-left="currentQuestionIndex === 0 ? 'Voltar' : 'Anterior'"
         :text-right="isLastQuestion ? 'Finalizar' : 'Próxima'"
-        @on-handle-left="previousQuestion"
-        @on-handle-right="nextQuestion"
+        @on-handle-left="goToPreviousQuestion"
+        @on-handle-right="goToNextQuestion"
       />
 
       <Toast
