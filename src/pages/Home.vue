@@ -1,16 +1,15 @@
 <script setup>
-// 1. External libs
-import { ref, computed, onMounted } from 'vue';
+// External libs
+import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { useQuizStore } from '@/stores/quizStore';
 
-// 2. Internal services & composables
-import { db } from '@/services/firebase-firestore';
+// Internal composables
 import { useAuth } from '@/use/useAuth';
-import { useToast } from '@/use/useToast';
 import { useStorage } from '@/use/useStorage';
+import { useToast } from '@/use/useToast';
 
-// 3. UI components
+// UI Components
 import { ChevronRightIcon } from '@heroicons/vue/24/solid';
 import Container from '@/components/Container.vue';
 import Heading from '@/components/Heading.vue';
@@ -19,61 +18,25 @@ import Avatar from '@/components/Avatar.vue';
 import Text from '@/components/Text.vue';
 import Loader from '@/components/Loader.vue';
 import Actions from '@/components/Actions.vue';
+import Toast from '@/components/Toast.vue';
 
-// 4. Composables
+// Router & stores
 const router = useRouter();
+const quizStore = useQuizStore();
 const { logOut } = useAuth();
-const { getStorage, removeStorage } = useStorage();
+const { removeStorage } = useStorage();
 const { toast, toastData, handleToast } = useToast();
 
-const user = ref(null);
-const quizzes = ref([]);
-const isLoading = ref(true);
+// Reativos da store (como computed para manter a reatividade)
+const user = computed(() => quizStore.user);
+const quizzes = computed(() => quizStore.quizzes);
+const isLoading = computed(() => quizStore.isLoading);
+const totalScore = computed(() => quizStore.totalScore);
+const completedCount = computed(() => quizStore.completedCount);
 
 const firstName = computed(() => {
   return user.value?.name?.split(' ')[0] || 'Visitante';
 });
-
-const checkQuizzes = async () => {
-  if (!user.value) return;
-
-  try {
-    const q = query(collection(db, 'results'), where('iduser', '==', user.value.id));
-    const querySnapshot = await getDocs(q);
-
-    const userQuizzes = [];
-    querySnapshot.forEach((doc) => {
-      userQuizzes.push(doc.data());
-    });
-
-    if (userQuizzes.length) {
-      const quizMap = new Map(userQuizzes.map(el => [el.idquiz, el.score]));
-      quizzes.value.forEach(quiz => {
-        if (quizMap.has(quiz.id)) {
-          quiz.score = quizMap.get(quiz.id);
-        }
-      });
-    }
-  } catch (error) {
-    console.error('Erro ao buscar quizzes do usuário: ', error);
-    handleToast('error', 'Não foi possível carregar os quizzes. Tente novamente mais tarde.');
-  }
-};
-
-
-const fetchQuizzes = async () => {
-  const querySnapshot = await getDocs(collection(db, 'quizzes'));
-  return querySnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data(),
-  })).sort((a, b) => a.id - b.id);
-};
-
-const loadQuizzes = async () => {
-  quizzes.value = await fetchQuizzes();
-  await checkQuizzes();
-  isLoading.value = false;
-};
 
 const signOut = async () => {
   const response = await logOut();
@@ -84,14 +47,23 @@ const signOut = async () => {
 };
 
 onMounted(async () => {
-  user.value = getStorage('user');
-  await loadQuizzes();
+  await quizStore.loadQuizzes();
 });
 </script>
 
 <template>
   <Container>
-    <div class="flex justify-between items-center w-full mb-5">
+    <div
+      v-if="isLoading"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-white/80"
+    >
+      <Loader color="primary" />
+    </div>
+
+    <div
+      v-if="!isLoading && user"
+      class="flex justify-between items-center w-full mb-5"
+    >
       <div class="flex flex-col items-start">
         <Heading
           size="lg"
@@ -108,17 +80,10 @@ onMounted(async () => {
     </div>
 
     <UserStats
-      :points="2300"
-      :ranking="32"
+      v-if="!isLoading"
+      :points="totalScore || 0"
+      :ranking="32" 
     />
-
-
-    <div
-      v-if="isLoading"
-      class="flex-1 flex flex-col items-center justify-center w-full"
-    >
-      <Loader color="primary" />
-    </div>
 
     <Text
       v-if="!isLoading && !quizzes.length"
@@ -158,6 +123,7 @@ onMounted(async () => {
     </div>
 
     <Actions
+      v-if="!isLoading"
       class="mt-5"
       text-left="Sair"
       text-right="Ranking"
