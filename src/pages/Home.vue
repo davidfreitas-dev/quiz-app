@@ -104,11 +104,11 @@ onMounted(async () => {
           class="quiz flex items-center justify-between gap-2 p-5 w-full text-dark rounded-2xl bg-light cursor-pointer"
         >
           <label class="text-sm font-semibold">
-            Prova {{ quiz.id }} <span v-if="quiz.score >= 0"> ({{ quiz.score }} Pontos)</span>
+            Prova {{ quiz.id }} <span v-if="quiz.score && quiz.score >= 0"> ({{ quiz.score }} Pontos)</span>
           </label>
 
           <span
-            v-if="quiz.score >= 0"
+            v-if="quiz.score && quiz.score >= 0"
             class="text-success text-sm font-semibold"
           >
             Concluída

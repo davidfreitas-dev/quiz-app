@@ -5,9 +5,10 @@ import { db } from '@/services/firebase-firestore';
 import { useStorage } from '@/use/useStorage';
 
 export const useQuizStore = defineStore('quiz', () => {
+  const user = ref(useStorage().getStorage('user'));
+  const quiz = ref(null);
   const quizzes = ref([]);
   const isLoading = ref(true);
-  const user = ref(useStorage().getStorage('user'));
 
   const totalScore = computed(() =>
     quizzes.value.reduce((acc, quiz) => acc + (quiz.score || 0), 0)
@@ -16,6 +17,22 @@ export const useQuizStore = defineStore('quiz', () => {
   const completedCount = computed(() =>
     quizzes.value.filter(q => q.score >= 0).length
   );
+
+  const loadQuizById = async (id) => {
+    isLoading.value = true;
+    try {
+      const q = query(collection(db, 'quizzes'), where('id', '==', Number(id)));
+      const querySnapshot = await getDocs(q);
+  
+      for (const docSnap of querySnapshot.docs) {
+        quiz.value = docSnap.data();
+      }
+    } catch (err) {
+      console.error('Erro ao carregar quiz:', err);
+    } finally {
+      isLoading.value = false;
+    }
+  };
 
   const loadQuizzes = async () => {
     isLoading.value = true;
@@ -49,11 +66,13 @@ export const useQuizStore = defineStore('quiz', () => {
   };
 
   return {
+    user,
+    quiz,
     quizzes,
     isLoading,
-    user,
     totalScore,
     completedCount,
-    loadQuizzes
+    loadQuizzes,
+    loadQuizById
   };
 });
