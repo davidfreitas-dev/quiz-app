@@ -11,12 +11,12 @@ import { useStorage } from '@/use/useStorage';
 import { useToast } from '@/use/useToast';
 
 // UI Components
-import { ChevronRightIcon } from '@heroicons/vue/24/solid';
 import Container from '@/components/Container.vue';
 import Heading from '@/components/Heading.vue';
 import UserStats from '@/components/UserStats.vue';
 import Avatar from '@/components/Avatar.vue';
 import Text from '@/components/Text.vue';
+import QuizCard from '@/components/QuizCard.vue';
 import Loader from '@/components/Loader.vue';
 import Actions from '@/components/Actions.vue';
 import Toast from '@/components/Toast.vue';
@@ -88,31 +88,11 @@ onMounted(async () => {
       v-if="!isLoading && quizzes.length"
       class="quizzes flex flex-1 flex-col items-start w-full gap-3 my-7"
     >
-      <template
+      <QuizCard
         v-for="(quiz, index) in quizzes"
         :key="index"
-      >
-        <router-link        
-          :to="`/quiz/${quiz.id}`"
-          class="quiz flex items-center justify-between gap-2 p-5 w-full text-dark rounded-2xl bg-light cursor-pointer"
-        >
-          <label class="text-sm font-semibold">
-            Prova {{ quiz.id }} <span v-if="quiz.score && quiz.score >= 0"> ({{ quiz.score }} Pontos)</span>
-          </label>
-
-          <span
-            v-if="quiz.score && quiz.score >= 0"
-            class="text-success text-sm font-semibold"
-          >
-            Concluída
-          </span>
-        
-          <ChevronRightIcon
-            v-else
-            class="h-5 w-5"
-          />
-        </router-link>
-      </template>
+        :quiz="quiz"
+      />
     </div>
 
     <Actions

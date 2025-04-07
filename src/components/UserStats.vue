@@ -14,7 +14,7 @@ defineProps({
 </script>
 
 <template>
-  <div class="flex items-center justify-between w-full max-w-sm bg-[#7b63dd] text-white py-1 rounded-2xl shadow-md">
+  <div class="flex items-center justify-between w-full max-w-sm bg-primary text-white py-1 rounded-2xl shadow-lg">
     <!-- Experience Points -->
     <div class="flex flex-1 items-center justify-start p-5 gap-3">
       <div class="bg-white/20 rounded-full p-3">
