@@ -9,6 +9,9 @@ export const useQuizStore = defineStore('quiz', () => {
   const quiz = ref(null);
   const quizzes = ref([]);
   const quizResult = ref(null);
+  const allUsers = ref([]);
+  const allResults = ref([]);
+  const usersResults = ref([]);
   const isQuizDone = ref(false);
   const isLoading = ref(true);
 
@@ -131,11 +134,49 @@ export const useQuizStore = defineStore('quiz', () => {
     }
   };
 
+  const fetchUsersAndResults = async () => {
+    await withLoading(async () => {
+      const usersSnapshot = await getDocs(collection(db, 'users'));
+      const resultsSnapshot = await getDocs(collection(db, 'results'));
+  
+      const usersList = usersSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        score: 0
+      }));
+  
+      const resultsList = resultsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+  
+      // Soma dos scores
+      for (const user of usersList) {
+        const userResults = resultsList.filter(result => result.iduser === user.id);
+        user.score = userResults.reduce((acc, r) => acc + (r.score || 0), 0);
+      }
+  
+      allUsers.value = usersList;
+      allResults.value = resultsList;
+  
+      // Ordenar ranking
+      usersResults.value = [...usersList]
+        .map(user => ({
+          ...user,
+          image: user.image || new URL('@/assets/user.png', import.meta.url).href
+        }))
+        .sort((a, b) => b.score - a.score);
+    });
+  };  
+
   return {
     user,
     quiz,
     quizzes,
     quizResult,
+    allUsers,
+    allResults,
+    usersResults,
     isLoading,
     isQuizDone,
     totalScore,
@@ -145,6 +186,7 @@ export const useQuizStore = defineStore('quiz', () => {
     fetchAllQuizzesWithScores,
     markQuizAsCompleted,
     submitQuizResult,
-    fetchQuizResult
+    fetchQuizResult,
+    fetchUsersAndResults
   };
 });

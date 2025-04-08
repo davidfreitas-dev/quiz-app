@@ -1,179 +1,134 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '@/services/firebase-firestore';
+import { storeToRefs } from 'pinia';
+import { useQuizStore } from '@/stores/quiz';
 import Container from '@/components/Container.vue';
 import Heading from '@/components/Heading.vue';
-import Text from '@/components/Text.vue';
 import Button from '@/components/Button.vue';
 
 const router = useRouter();
-const isLoading = ref(true);
-const results = ref([]);
-const users = ref([]);
+const quizStore = useQuizStore();
+const { usersResults, isLoading } = storeToRefs(quizStore);
 
-const getUsers = async () => {
-  const querySnapshot = await getDocs(collection(db, 'users'));
-
-  querySnapshot.forEach((doc) => {
-    users.value.push({
-      ...{ id: doc.id },
-      ...{ score: 0 },
-      ...doc.data()
-    });
-  });
-
-  await getResults();
-
-  isLoading.value = false;
-};
-
-const getResults = async () => {
-  const querySnapshot = await getDocs(collection(db, 'results'));
-
-  querySnapshot.forEach((doc) => {
-    results.value.push({
-      ...{ id: doc.id },
-      ...doc.data()
-    });
-  });
-};
-
-const usersResults = computed(() => {
-  const data = users.value.map(user => {
-    results.value.forEach(result => {
-      if (user.id === result.iduser) {
-        user.score += result.score;
-      }
-    });
-
-    return user;
-  });
-
-  return data.sort((a, b) => b.score - a.score);
+const topThree = computed(() => {
+  return Array.isArray(usersResults.value)
+    ? usersResults.value.slice(0, 3)
+    : [];
 });
 
-onMounted(() => {
-  getUsers();
+const others = computed(() => {
+  return Array.isArray(usersResults.value)
+    ? usersResults.value.slice(3)
+    : [];
+});
+
+const currentUserIndex = computed(() => {
+  return usersResults.value.findIndex(u => u.email === 'seu@email.com'); // <- Substitua pelo usuário atual
+});
+
+const currentPercentile = computed(() => {
+  if (usersResults.value.length === 0 || currentUserIndex.value === -1) return 0;
+  return Math.floor(((usersResults.value.length - currentUserIndex.value - 1) / usersResults.value.length) * 100);
+});
+
+const splitUserName =(name) => {
+  return name.split(' ')[0];
+};
+
+onMounted(async () => {
+  await quizStore.fetchUsersAndResults();
 });
 </script>
 
 <template>
   <Container>
-    <Heading
-      size="lg"
-      text="Ranking"
-    />
+    <Heading size="lg" text="Ranking" />
 
-    <Text
-      v-if="!isLoading && !usersResults.length"
-      text="Nenhum participante cadastrado ainda :("
-      class="text-center"
-    />
-
-    <div class="table w-full mt-5 mb-20">
-      <table
-        v-if="usersResults && usersResults.length"
-        class="w-full text-sm"
-      >
-        <thead class="text-dark font-bold uppercase">
-          <tr>
-            <td
-              class="py-3"
-              width="7%"
-            >
-              #
-            </td>
-            <td
-              class="p-1"
-              width="83%"
-            >
-              Participante
-            </td>
-            <td
-              class="py-3"
-              width="10%"
-            >
-              Pontos
-            </td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(user, index) in usersResults"
-            :key="index"
-          >
-            <td
-              class="py-3"
-            >
-              {{ index+1 }}
-            </td>
-            <td
-              class="py-2"
-            >
-              <div class="flex items-center">
-                <div
-                  v-if="!user.image"
-                  class="default-img bg-[url('@/assets/user.jpeg')] bg-cover bg-no-repeat bg-center w-10 h-10"
-                />
-              
-                <img
-                  v-else
-                  :src="user.image"
-                  :alt="`Imagem de ${user.name}`"
-                  class="user-img mx-1 w-8 h-8 rounded-full"
-                >
-
-                <div class="pl-2">
-                  <div class="font-semibold">
-                    {{ user.name }}
-                  </div>
-                  
-                  <div class="font-normal text-xs text-gray-500">
-                    {{ user.email }}
-                  </div>
-                </div>  
-              </div>
-            </td>
-            <td
-              class="py-3"
-              align="center"
-            >
-              {{ user.score }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div
-        v-if="!usersResults || !usersResults.length"
-        role="status"
-        class="max-w-md space-y-4 divide-y divide-gray-200 animate-pulse"
-      >
-        <div
-          v-for="(n, index) in 5"
-          :key="index"
-          class="flex items-center justify-between pt-4 w-full"
-        >
-          <div class="flex items-center gap-3">
-            <div class="h-8 w-8 rounded-full bg-gray-200" />
-            <div>
-              <div class="h-2.5 bg-gray-300 rounded-full w-24 mb-2.5" />
-              <div class="w-32 h-2 bg-gray-200 rounded-full" />
-            </div>
-          </div>
-          <div class="h-2.5 self-end bg-gray-300 rounded-full w-12" />
-        </div>
-        <span class="sr-only">Loading...</span>
+    <div v-if="!isLoading && usersResults.length" class="text-center w-full my-4">
+      <div class="bg-primary-light text-primary p-5 rounded-xl text-sm font-medium">
+        Você está melhor que {{ currentPercentile }}% dos jogadores!
       </div>
     </div>
 
-    <div class="fixed left-0 bottom-0 w-full p-[5%]">
-      <Button
-        size="block"
-        @click="router.push('/')"
+    <!-- PÓDIO -->
+    <div v-if="topThree.length === 3" class="flex justify-center items-end">
+      <!-- 2º lugar -->
+      <div class="flex flex-col items-center w-28 translate-y-3">
+        <img
+          :src="topThree[1].image"
+          class="w-16 h-16 rounded-full border-4 border-gray-200 shadow-md"
+          alt="Segundo colocado"
+        >
+        <p class="text-sm mt-2 text-gray-700 font-semibold text-center">
+          {{ splitUserName(topThree[1].name) }}
+        </p>
+        <div class="text-xs bg-gray-100 px-4 py-2 rounded-lg mt-1 shadow text-gray-800 font-medium">
+          {{ topThree[1].score }} pontos
+        </div>
+      </div>
+
+      <!-- 1º lugar -->
+      <div class="flex flex-col items-center w-28">
+        <img
+          :src="topThree[0].image"
+          class="w-[80px] h-[80px] rounded-full border-4 border-yellow-400 shadow-lg"
+          alt="Primeiro colocado"
+        >
+        <p class="text-sm mt-2 text-gray-700 font-bold text-center">
+          {{ splitUserName(topThree[0].name) }}
+        </p>
+        <div class="text-xs bg-gray-100 text-gray-800 px-4 py-2 rounded-lg mt-1 shadow font-semibold">
+          {{ topThree[0].score }} pontos
+        </div>
+      </div>
+
+      <!-- 3º lugar -->
+      <div class="flex flex-col items-center w-28 translate-y-7">
+        <img
+          :src="topThree[2].image"
+          class="w-16 h-16 rounded-full border-4 border-gray-200 shadow-md"
+          alt="Terceiro colocado"
+        >
+        <p class="text-sm mt-2 text-gray-700 font-semibold text-center truncate">
+          {{ splitUserName(topThree[2].name) }}
+        </p>
+        <div class="text-xs bg-gray-100 px-4 py-2 rounded-lg mt-1 shadow text-gray-800 font-medium">
+          {{ topThree[2].score }} pontos
+        </div>
+      </div>
+    </div>
+
+    <!-- RANKING COMPLETO -->
+    <div class="space-y-3">
+      <div
+        v-for="(user, index) in others"
+        :key="user.id"
+        class="flex items-center justify-between bg-white rounded-xl shadow p-3"
       >
+        <div class="flex items-center gap-3">
+          <span class="font-bold w-6 text-right">{{ index + 4 }}</span>
+          <img
+            :src="user.image || '../assets/user.png'"
+            class="w-8 h-8 rounded-full"
+            :alt="`Imagem de ${user.name}`"
+          >
+          <div>
+            <div class="text-sm font-semibold">
+              {{ user.name }}
+            </div>
+            <div class="text-xs text-gray-400">
+              {{ user.email }}
+            </div>
+          </div>
+        </div>
+        <span class="font-bold text-sm">{{ user.score }} pts</span>
+      </div>
+    </div>
+
+    <!-- BOTÃO -->
+    <div class="fixed left-0 bottom-0 w-full p-5 bg-white">
+      <Button size="block" @click="router.push('/')">
         Voltar ao início
       </Button>
     </div>

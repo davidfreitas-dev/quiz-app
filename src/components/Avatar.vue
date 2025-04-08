@@ -8,7 +8,7 @@ const props = defineProps({
   },
 });
 
-const imageSrc = computed(() => props.image || new URL('../assets/user.jpeg', import.meta.url).href);
+const imageSrc = computed(() => props.image || new URL('../assets/user.png', import.meta.url).href);
 </script>
 
 <template>
