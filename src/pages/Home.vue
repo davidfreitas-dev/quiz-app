@@ -42,6 +42,16 @@ onMounted(async () => {
 </script>
 
 <template>
+  <Header :user="user">
+    <template #user-stats>
+      <UserStats
+        v-if="!isLoading"
+        :points="totalScore || 0"
+        :ranking="7"
+      />
+    </template>
+  </Header>
+
   <Container>
     <div
       v-if="isLoading"
@@ -49,14 +59,6 @@ onMounted(async () => {
     >
       <Loader color="primary" />
     </div>
-
-    <Header :user="user" />
-
-    <UserStats
-      v-if="!isLoading"
-      :points="totalScore || 0"
-      :ranking="32" 
-    />
 
     <Text
       v-if="!isLoading && !quizzes.length"
@@ -69,6 +71,13 @@ onMounted(async () => {
       v-if="!isLoading && quizzes.length"
       class="quizzes flex flex-1 flex-col items-start w-full gap-3 my-7"
     >
+      <Text
+        class="leading-6"
+        size="sm"
+        weight="bold"
+        text="Questionários"
+      />
+
       <QuizCard
         v-for="(quiz, index) in quizzes"
         :key="index"

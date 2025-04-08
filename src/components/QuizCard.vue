@@ -1,5 +1,4 @@
 <script setup>
-import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import { ChevronRightIcon, CheckCircleIcon } from '@heroicons/vue/24/solid';
 
@@ -20,10 +19,10 @@ const props = defineProps({
     ]"
   >
     <div class="flex flex-col flex-1 pl-2">
-      <span class="text-lg font-bold text-dark">
+      <span class="text-lg font-bold text-dark leading-5">
         {{ quiz.description }}
       </span>
-      <span class="text-sm text-gray-500 font-light mt-1">
+      <span class="text-sm text-secondary font-normal mt-1">
         {{ quiz.questions.length }} questões
       </span>
     </div>
