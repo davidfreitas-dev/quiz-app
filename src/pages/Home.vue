@@ -1,6 +1,6 @@
 <script setup>
 // External libs
-import { computed, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { useQuizStore } from '@/stores/quizStore';
@@ -12,9 +12,8 @@ import { useToast } from '@/use/useToast';
 
 // UI Components
 import Container from '@/components/Container.vue';
-import Heading from '@/components/Heading.vue';
+import Header from '@/components/Header.vue';
 import UserStats from '@/components/UserStats.vue';
-import Avatar from '@/components/Avatar.vue';
 import Text from '@/components/Text.vue';
 import QuizCard from '@/components/QuizCard.vue';
 import Loader from '@/components/Loader.vue';
@@ -28,10 +27,6 @@ const { logOut } = useAuth();
 const { removeStorage } = useStorage();
 const { toast, toastData, handleToast } = useToast();
 const { user, quizzes, isLoading, totalScore, completedCount } = storeToRefs(quizStore);
-
-const firstName = computed(() => {
-  return user.value?.name?.split(' ')[0] || 'Visitante';
-});
 
 const signOut = async () => {
   const response = await logOut();
@@ -55,21 +50,7 @@ onMounted(async () => {
       <Loader color="primary" />
     </div>
 
-    <div class="flex justify-between items-center w-full mb-5">
-      <div class="flex flex-col items-start">
-        <Heading
-          size="lg"
-          :text="`👋 Olá ${firstName},`"
-        />
-
-        <Text
-          text="É bom vê-lo novamente!"
-          class="text-center mt-1"
-        />
-      </div>
-
-      <Avatar :image="user?.image" />
-    </div>
+    <Header :user="user" />
 
     <UserStats
       v-if="!isLoading"
