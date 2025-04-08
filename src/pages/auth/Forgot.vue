@@ -92,22 +92,8 @@ const { toast, toastData, handleToast } = useToast();
       <router-link to="/signin">
         <Text
           size="sm"
-          text="Voltar para a tela de login"
-          class="text-gray-400 cursor-pointer hover:text-brand-hover hover:underline"
-        />
-      </router-link>
-
-      <router-link to="/signup">
-        <Text
-          size="sm"
-          text="Não possui conta?"
-          class="text-gray-400 cursor-pointer hover:text-gray-200"
-        />
-
-        <Text
-          size="sm"
-          text=" Crie uma agora!"
-          class="text-gray-400 cursor-pointer hover:text-brand-hover hover:underline"
+          text="Acessar minha conta"
+          class="text-primary cursor-pointer text-brand-hover underline"
         />
       </router-link>
     </footer>

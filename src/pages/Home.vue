@@ -26,7 +26,7 @@ const quizStore = useQuizStore();
 const { logOut } = useAuth();
 const { removeStorage } = useStorage();
 const { toast, toastData, handleToast } = useToast();
-const { user, quizzes, isLoading, totalScore, completedCount } = storeToRefs(quizStore);
+const { user, quizzes, isLoading, totalScore } = storeToRefs(quizStore);
 
 const signOut = async () => {
   const response = await logOut();
@@ -44,19 +44,12 @@ onMounted(async () => {
 <template>
   <Header :user="user">
     <template #user-stats>
-      <UserStats
-        v-if="!isLoading"
-        :points="totalScore || 0"
-        :ranking="7"
-      />
+      <UserStats :points="totalScore || 0" :ranking="0" />
     </template>
   </Header>
 
   <Container>
-    <div
-      v-if="isLoading"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-white/80"
-    >
+    <div v-if="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-white/80">
       <Loader color="primary" />
     </div>
 
@@ -67,13 +60,10 @@ onMounted(async () => {
       size="md"
     />
 
-    <div
-      v-if="!isLoading && quizzes.length"
-      class="quizzes flex flex-1 flex-col items-start w-full gap-3 my-7"
-    >
+    <div v-if="!isLoading && quizzes.length" class="quizzes flex flex-1 flex-col items-start w-full gap-3 my-7">
       <Text
-        class="leading-6"
-        size="sm"
+        class="leading-6 text-gray-900 mb-3"
+        size="md"
         weight="bold"
         text="Questionários"
       />
@@ -94,9 +84,6 @@ onMounted(async () => {
       @on-handle-right="router.push('/ranking')"
     />
     
-    <Toast
-      ref="toast"
-      :toast-data="toastData"
-    />
+    <Toast ref="toast" :toast-data="toastData" />
   </Container>
 </template>

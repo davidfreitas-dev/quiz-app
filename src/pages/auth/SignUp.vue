@@ -145,21 +145,15 @@ const { toast, toastData, handleToast } = useToast();
         <Text
           :size="'sm'"
           :text="'Esqueceu sua senha?'"
-          class="text-primary cursor-pointer hover:text-brand-hover hover:underline"
+          class="text-primary cursor-pointer text-brand-hover underline"
         />
       </router-link>
 
       <router-link to="/signin">
         <Text
           size="sm"
-          text="Já possui conta?"
-          class="text-primary cursor-pointer hover:text-gray-200"
-        />
-
-        <Text
-          size="sm"
-          text=" Entre agora!"
-          class="text-primary cursor-pointer hover:text-brand-hover hover:underline"
+          text="Acessar minha conta"
+          class="text-primary cursor-pointer text-brand-hover underline"
         />
       </router-link>
     </footer>

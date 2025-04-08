@@ -127,26 +127,20 @@ const { toast, toastData, handleToast } = useToast();
       <GoogleButton />
     </form>
 
-    <footer class="flex flex-col items-center gap-4 my-8">
+    <footer class="flex flex-col items-center gap-4 my-8 min-w-full">
       <router-link to="/forgot">
         <Text
           size="sm"
           text="Esqueceu sua senha?"
-          class="text-gray-400 cursor-pointer hover:text-brand-hover hover:underline"
+          class="text-primary cursor-pointer text-brand-hover underline"
         />
       </router-link>
 
       <router-link to="/signup">
         <Text
           size="sm"
-          text="Não possui conta?"
-          class="text-gray-400 cursor-pointer hover:text-gray-200"
-        />
-
-        <Text
-          size="sm"
-          text=" Crie uma agora!"
-          class="text-gray-400 cursor-pointer hover:text-brand-hover hover:underline"
+          text="Criar conta"
+          class="text-primary cursor-pointer text-brand-hover underline"
         />
       </router-link>
     </footer>
