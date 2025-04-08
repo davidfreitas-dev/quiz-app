@@ -40,15 +40,6 @@ export const useQuizStore = defineStore('quiz', () => {
     }
   };
 
-  const markSelectedOptions = (questions, answers) => {
-    for (const question of questions) {
-      const answer = answers.find(a => a.id === question.id);
-      for (const option of question.options) {
-        option.selected = option.option === answer.option;
-      }
-    }
-  };
-
   const fetchQuizById = async (id) => {
     await withLoading(async () => {
       const q = query(collection(db, 'quizzes'), where('id', '==', Number(id)));
@@ -83,56 +74,32 @@ export const useQuizStore = defineStore('quiz', () => {
     });
   };
 
-  const markQuizAsCompleted = async (quizId, userId) => {
-    try {
-      const q = query(
-        collection(db, 'results'),
-        where('idquiz', '==', Number(quizId)),
-        where('iduser', '==', userId)
-      );
-      const querySnapshot = await getDocs(q);
-      const quizData = querySnapshot.docs[0]?.data() || null;
-
-      isQuizDone.value = !!quizData;
-
-      if (quizData?.answers?.length) {
-        markSelectedOptions(quiz.value.questions, quizData.answers);
-      }
-    } catch (err) {
-      console.error('Erro ao verificar conclusão do quiz:', err);
-    }
-  };
-
-  const submitQuizResult = async ({ quizId, userId, userName, answers, score }) => {
-    try {
+  const submitQuizResult = async ({ quizId, answers, score }) => {
+    await withLoading(async () => {
       const docRef = doc(collection(db, 'results'));
       await setDoc(docRef, {
         idquiz: quizId,
-        iduser: userId,
-        name: userName,
+        iduser: user.value.id,
+        name: user.value.name,
         answers,
         score,
       });
-    } catch (err) {
-      console.error('Erro ao salvar resultado: ', err);
-    }
-  };
+    });
+  };    
 
   const fetchQuizResult = async (quizId) => {
-    try {
+    await withLoading(async () => {
       const q = query(
         collection(db, 'results'),
         where('idquiz', '==', Number(quizId)),
         where('iduser', '==', user.value.id)
       );
-
+  
       const querySnapshot = await getDocs(q);
-
+  
       quizResult.value = querySnapshot.docs[0]?.data() || null;
-    } catch (err) {
-      console.error('Erro ao obter resultado: ', err);
-    }
-  };
+    });
+  };  
 
   const fetchUsersAndResults = async () => {
     await withLoading(async () => {
@@ -184,7 +151,6 @@ export const useQuizStore = defineStore('quiz', () => {
     initUser,
     fetchQuizById,
     fetchAllQuizzesWithScores,
-    markQuizAsCompleted,
     submitQuizResult,
     fetchQuizResult,
     fetchUsersAndResults

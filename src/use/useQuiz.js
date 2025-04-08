@@ -2,20 +2,17 @@ import { ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuizStore } from '@/stores/quiz';
-import { useStorage } from '@/use/useStorage';
 import { useToast } from '@/use/useToast';
 
 export function useQuiz() {
   const route = useRoute();
   const router = useRouter();
   const quizStore = useQuizStore();
-
-  const { getStorage } = useStorage();
+  
   const { toast, toastData, handleToast } = useToast();
-  const { quiz, isLoading, isQuizDone } = storeToRefs(quizStore);
-  const { fetchQuizById, markQuizAsCompleted, submitQuizResult } = quizStore;
-
-  const user = ref(undefined);
+  const { quiz, isLoading, isQuizDone, quizResult } = storeToRefs(quizStore);
+  const { fetchQuizById, submitQuizResult } = quizStore;
+  
   const userAnswers = ref([]);
   const currentQuestionIndex = ref(0);
   const score = ref(0);
@@ -24,7 +21,6 @@ export function useQuiz() {
   const currentQuestion = computed(() => questions.value[currentQuestionIndex.value] || null);
   const isLastQuestion = computed(() => currentQuestionIndex.value === questions.value.length - 1);
   const progress = computed(() => (100 / questions.value.length) * (currentQuestionIndex.value + 1));
-
   const isCurrentQuestionReady = computed(() => {
     return (
       currentQuestion.value &&
@@ -33,14 +29,31 @@ export function useQuiz() {
     );
   });
 
-  const loadUserFromStorage = () => {
-    user.value = getStorage('user');
+  const markSelectedOptions = (questions, answers) => {
+    if (!questions || !answers) return;
+    for (const question of questions) {
+      const answer = answers.find(a => a.id === question.id);
+      for (const option of question.options) {
+        option.selected = option.option === answer.option;
+      }
+    }
+  };
+  
+  const markQuizAsCompleted = async (quizId) => {
+    await quizStore.fetchQuizResult(quizId);
+  
+    if (quizResult.value?.answers?.length) {
+      isQuizDone.value = true;
+      markSelectedOptions(quiz.value.questions, quizResult.value.answers);
+    } else {
+      isQuizDone.value = false;
+    }
   };
 
   const fetchQuiz = async () => {
     const quizId = Number(route.params.id);
     await fetchQuizById(quizId);
-    await markQuizAsCompleted(quizId, user.value.id);
+    await markQuizAsCompleted(quizId);
   };
 
   const selectOptionByValue = (value) => {
@@ -92,12 +105,11 @@ export function useQuiz() {
   };
 
   const finishQuiz = async () => {
+    selectOptionByValue(getCurrentSelectedOption());
     evaluateAnswers();
 
     await submitQuizResult({
       quizId: quiz.value.id,
-      userId: user.value.id,
-      userName: user.value.name,
       answers: userAnswers.value,
       score: score.value,
     });
@@ -115,12 +127,10 @@ export function useQuiz() {
 
     if (isQuizDone.value) {
       router.push('/');
-      return;
+    } else {
+      await finishQuiz();
     }
-
-    await finishQuiz();
   };
-
 
   const computeOptionClass = (option, checked) => {
     const baseClass =
@@ -145,7 +155,6 @@ export function useQuiz() {
   return {
     // refs
     quiz,
-    user,
     isQuizDone,
     isLoading,
     currentQuestionIndex,
@@ -155,12 +164,13 @@ export function useQuiz() {
     toastData,
     toast,
     // methods
-    loadUserFromStorage,
     fetchQuiz,
+    markSelectedOptions,
+    markQuizAsCompleted,
     selectOptionByValue,
+    computeOptionClass,
     getCurrentSelectedOption,
     goToPreviousQuestion,
     goToNextQuestion,
-    computeOptionClass,
   };
 }

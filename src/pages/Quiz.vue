@@ -12,14 +12,12 @@ import Toast from '@/components/Toast.vue';
 const {
   quiz,
   isLoading,
-  isQuizDone,
   currentQuestionIndex,
   currentQuestion,
   isLastQuestion,
   progress,
   toast,
   toastData,
-  loadUserFromStorage,
   fetchQuiz,
   selectOptionByValue,
   getCurrentSelectedOption,
@@ -29,7 +27,6 @@ const {
 } = useQuiz();
 
 onMounted(async () => {
-  loadUserFromStorage();
   await fetchQuiz();
 });
 </script>
@@ -69,8 +66,6 @@ onMounted(async () => {
           <QuestionOption
             :option="option"
             :checked="checked"
-            :is-quiz-done="isQuizDone"
-            :correct-answer="currentQuestion.answer"
             :get-option-class="computeOptionClass"
           />
         </RadioGroupOption>

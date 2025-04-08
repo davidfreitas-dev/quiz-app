@@ -71,7 +71,7 @@ const resultMessage = computed(() => {
       </div>
       
       <div class="bg-white text-success px-4 py-2 rounded-full shadow-lg border border-gray-100 text-sm font-bold">
-        +25 XP
+        +{{ quiz.score }} XP
       </div>
       
       <div class="message">
