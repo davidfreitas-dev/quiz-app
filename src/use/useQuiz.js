@@ -123,18 +123,24 @@ export function useQuiz() {
 
 
   const computeOptionClass = (option, checked) => {
-    const base = 'flex items-center gap-2 px-5 w-full h-14 rounded-2xl transition-colors text-dark';
-    const selectedClass = checked ? 'bg-primary-light text-primary' : 'bg-light';
-
-    const correctAnswerClass =
+    const baseClass =
+      'flex justify-between items-center gap-2 px-5 w-full h-14 rounded-2xl shadow-sm transition-colors text-dark';
+  
+    const isCorrectAnswer =
       isQuizDone.value &&
       isCurrentQuestionReady.value &&
-      option?.option === currentQuestion.value.answer
-        ? 'text-success bg-success-light'
-        : '';
-
-    return `${base} ${selectedClass} ${correctAnswerClass}`;
-  };
+      option?.option === currentQuestion.value.answer;
+  
+    const selectedClass = checked
+      ? 'bg-primary-light text-primary'
+      : 'bg-light';
+  
+    const correctAnswerClass = isCorrectAnswer
+      ? 'text-success bg-success-light'
+      : '';
+  
+    return [baseClass, selectedClass, correctAnswerClass].join(' ').trim();
+  };  
 
   return {
     // refs

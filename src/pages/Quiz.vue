@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useQuiz } from '@/use/useQuiz';
-import { CheckCircleIcon } from '@heroicons/vue/24/solid';
 import { RadioGroup, RadioGroupLabel, RadioGroupOption, } from '@headlessui/vue';
 import Container from '@/components/Container.vue';
 import QuizHeader from '@/components/QuizHeader.vue';
@@ -60,7 +59,7 @@ onMounted(async () => {
       <RadioGroup
         :model-value="getCurrentSelectedOption()"
         @update:model-value="selectOptionByValue"
-        class="flex flex-1 flex-col items-start w-full gap-3"
+        class="flex flex-1 flex-col items-start w-full gap-3 mb-3"
       >
         <RadioGroupLabel class="sr-only">
           Escolha uma opção
