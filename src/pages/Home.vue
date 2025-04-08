@@ -3,7 +3,7 @@
 import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
-import { useQuizStore } from '@/stores/quizStore';
+import { useQuizStore } from '@/stores/quiz';
 
 // Internal composables
 import { useAuth } from '@/use/useAuth';

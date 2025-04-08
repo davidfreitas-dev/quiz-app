@@ -8,8 +8,9 @@ export const useQuizStore = defineStore('quiz', () => {
   const user = ref(null);
   const quiz = ref(null);
   const quizzes = ref([]);
-  const isLoading = ref(true);
+  const quizResult = ref(null);
   const isQuizDone = ref(false);
+  const isLoading = ref(true);
 
   const initUser = () => {
     user.value = useStorage().getStorage('user');
@@ -110,7 +111,23 @@ export const useQuizStore = defineStore('quiz', () => {
         score,
       });
     } catch (err) {
-      console.error('Erro ao salvar resultado:', err);
+      console.error('Erro ao salvar resultado: ', err);
+    }
+  };
+
+  const fetchQuizResult = async (quizId) => {
+    try {
+      const q = query(
+        collection(db, 'results'),
+        where('idquiz', '==', Number(quizId)),
+        where('iduser', '==', user.value.id)
+      );
+
+      const querySnapshot = await getDocs(q);
+
+      quizResult.value = querySnapshot.docs[0]?.data() || null;
+    } catch (err) {
+      console.error('Erro ao obter resultado: ', err);
     }
   };
 
@@ -118,6 +135,7 @@ export const useQuizStore = defineStore('quiz', () => {
     user,
     quiz,
     quizzes,
+    quizResult,
     isLoading,
     isQuizDone,
     totalScore,
@@ -126,6 +144,7 @@ export const useQuizStore = defineStore('quiz', () => {
     fetchQuizById,
     fetchAllQuizzesWithScores,
     markQuizAsCompleted,
-    submitQuizResult
+    submitQuizResult,
+    fetchQuizResult
   };
 });

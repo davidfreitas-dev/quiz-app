@@ -36,17 +36,11 @@ onMounted(async () => {
 
 <template>
   <Container>
-    <div
-      v-if="isLoading"
-      class="flex flex-col items-center justify-center w-full h-screen"
-    >
+    <div v-if="isLoading" class="flex flex-col items-center justify-center w-full h-screen">
       <Loader color="primary" />
     </div>
 
-    <div
-      v-if="!isLoading && quiz"
-      class="quiz-container flex flex-col items-start w-full"
-    >
+    <div v-if="!isLoading && quiz" class="quiz-container flex flex-col items-start w-full">
       <QuizHeader
         v-if="currentQuestion"
         :quiz-id="quiz.id"
@@ -90,10 +84,7 @@ onMounted(async () => {
         @on-handle-right="goToNextQuestion"
       />
 
-      <Toast
-        ref="toast"
-        :toast-data="toastData"
-      />
+      <Toast ref="toast" :toast-data="toastData" />
     </div>
   </Container>
 </template>

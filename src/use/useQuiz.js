@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
-import { useQuizStore } from '@/stores/quizStore';
+import { useQuizStore } from '@/stores/quiz';
 import { useStorage } from '@/use/useStorage';
 import { useToast } from '@/use/useToast';
 
