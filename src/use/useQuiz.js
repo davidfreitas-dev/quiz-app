@@ -11,7 +11,7 @@ export function useQuiz() {
   
   const { toast, toastData, handleToast } = useToast();
   const { quiz, isLoading, isQuizDone, quizResult } = storeToRefs(quizStore);
-  const { fetchQuizById, submitQuizResult } = quizStore;
+  const { fetchQuizById, fetchQuizResult, submitQuizResult } = quizStore;
   
   const userAnswers = ref([]);
   const currentQuestionIndex = ref(0);
@@ -40,20 +40,30 @@ export function useQuiz() {
   };
   
   const markQuizAsCompleted = async (quizId) => {
-    await quizStore.fetchQuizResult(quizId);
+    try {
+      await fetchQuizResult(quizId);
   
-    if (quizResult.value?.answers?.length) {
-      isQuizDone.value = true;
-      markSelectedOptions(quiz.value.questions, quizResult.value.answers);
-    } else {
-      isQuizDone.value = false;
+      if (quizResult.value?.answers?.length) {
+        isQuizDone.value = true;
+        markSelectedOptions(quiz.value.questions, quizResult.value.answers);
+      } else {
+        isQuizDone.value = false;
+      }
+    } catch (error) {
+      handleToast('error', 'Erro ao carregar o resultado do quiz. Tente novamente mais tarde.');
+      console.error(error);
     }
-  };
+  };  
 
   const fetchQuiz = async () => {
     const quizId = Number(route.params.id);
-    await fetchQuizById(quizId);
-    await markQuizAsCompleted(quizId);
+    try {
+      await fetchQuizById(quizId);
+      await markQuizAsCompleted(quizId);
+    } catch (error) {
+      handleToast('error', 'Erro ao carregar o quiz. Tente novamente mais tarde.');
+      console.error(error);
+    }
   };
 
   const selectOptionByValue = (value) => {
@@ -66,6 +76,17 @@ export function useQuiz() {
   const getCurrentSelectedOption = () => {
     const selected = currentQuestion.value.options.find((o) => o.selected);
     return selected ? selected.option : null;
+  };
+
+  const validateCurrentAnswer = () => {
+    const hasSelectedOption = currentQuestion.value?.options?.some((option) => option.selected);
+    
+    if (!hasSelectedOption) {
+      handleToast('error', 'Selecione uma opção antes de continuar');
+      return false;
+    }
+
+    return true;
   };
 
   const evaluateAnswers = () => {
@@ -93,30 +114,6 @@ export function useQuiz() {
     }
   };
 
-  const validateCurrentAnswer = () => {
-    const hasSelectedOption = currentQuestion.value?.options?.some((option) => option.selected);
-    
-    if (!hasSelectedOption) {
-      handleToast('error', 'Selecione uma opção antes de continuar');
-      return false;
-    }
-
-    return true;
-  };
-
-  const finishQuiz = async () => {
-    selectOptionByValue(getCurrentSelectedOption());
-    evaluateAnswers();
-
-    await submitQuizResult({
-      quizId: quiz.value.id,
-      answers: userAnswers.value,
-      score: score.value,
-    });
-
-    router.push(`/result/${quiz.value.id}`);
-  };
-
   const goToNextQuestion = async () => {
     if (!isQuizDone.value && !validateCurrentAnswer()) return;
 
@@ -132,9 +129,27 @@ export function useQuiz() {
     }
   };
 
+  const finishQuiz = async () => {
+    try {
+      selectOptionByValue(getCurrentSelectedOption());
+      evaluateAnswers();
+  
+      await submitQuizResult({
+        quizId: quiz.value.id,
+        answers: userAnswers.value,
+        score: score.value,
+      });
+  
+      router.push(`/result/${quiz.value.id}`);
+    } catch (error) {
+      handleToast('error', 'Erro ao finalizar o quiz. Tente novamente mais tarde.');
+      console.error(error);
+    }
+  };  
+
   const computeOptionClass = (option, checked) => {
     const baseClass =
-      'flex justify-between items-center gap-2 px-5 w-full h-14 rounded-2xl shadow-sm transition-colors text-dark';
+      'flex justify-between items-center gap-2 px-3 w-full h-14 rounded-2xl shadow-sm transition-colors text-dark';
   
     const isCorrectAnswer =
       isQuizDone.value &&
@@ -153,7 +168,6 @@ export function useQuiz() {
   };  
 
   return {
-    // refs
     quiz,
     isQuizDone,
     isLoading,
@@ -163,7 +177,6 @@ export function useQuiz() {
     progress,
     toastData,
     toast,
-    // methods
     fetchQuiz,
     markSelectedOptions,
     markQuizAsCompleted,
