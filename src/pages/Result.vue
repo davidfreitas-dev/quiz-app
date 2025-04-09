@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuizStore } from '@/stores/quiz';
 import Container from '@/components/Container.vue';
@@ -11,33 +11,55 @@ const quizStore = useQuizStore();
 
 const quiz = computed(() => quizStore.quizResult);
 
+const score = ref(0);
+const percentage = ref(0);
+const finalPercentage = ref(0);
+
+const animateNumber = (targetRef, finalValue, formatFn = (v) => Math.round(v)) => {
+  let currentValue = targetRef.value || 0;
+  const increment = (finalValue - currentValue) / 30;
+
+  let count = 0;
+  const interval = setInterval(() => {
+    currentValue += increment;
+    targetRef.value = formatFn(currentValue);
+
+    count++;
+    if (count >= 30) {
+      targetRef.value = formatFn(finalValue);
+      clearInterval(interval);
+    }
+  }, 15);
+};
+
 onMounted(async () => {
   await quizStore.fetchQuizResult(route.params.id);
-  console.log(quiz.value);
-});
 
-const percentage = computed(() => {
-  if (!quiz.value) return 0;
-  const questionsCount = quiz.value.answers.length || 0;
-  return Math.round((quiz.value.score / questionsCount) * 100);
+  if (quiz.value) {
+    const totalQuestions = quiz.value.answers.length || 0;
+    finalPercentage.value = Math.round((quiz.value.score / totalQuestions) * 100);
+
+    animateNumber(percentage, finalPercentage.value);
+    animateNumber(score, quiz.value.score);
+  }
 });
 
 const resultTitle = computed(() => {
-  if (percentage.value < 50) return 'Não desista!';
-  if (percentage.value < 80) return 'Você está quase lá!';
+  if (finalPercentage.value < 50) return 'Não desista!';
+  if (finalPercentage.value < 80) return 'Você está quase lá!';
   return 'Excelente!';
 });
 
 const resultMessage = computed(() => {
-  if (percentage.value < 50) return 'Estude mais da próxima vez e acerte todas!';
-  if (percentage.value < 80) return 'Mais um pouco de dedicação e você vai arrasar!';
-  return 'Você mandou muito bem! Continue assim e conquiste novos desafios!';
+  if (finalPercentage.value < 50) return 'Estude mais da próxima vez e acerte todas!';
+  if (finalPercentage.value < 80) return 'Mais um pouco de dedicação e você vai arrasar!';
+  return 'Você mandou muito bem! Continue assim e aumente o seu conhecimento!';
 });
 </script>
 
 <template>
   <Container>
-    <div v-if="quiz" class="flex flex-col items-center justify-center min-h-screen gap-6 text-center px-4">
+    <div v-if="quiz" class="flex flex-col items-center justify-center mt-20 gap-6 text-center px-4">
       <div class="relative w-32 h-32">
         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
           <circle
@@ -71,7 +93,7 @@ const resultMessage = computed(() => {
       </div>
       
       <div class="bg-white text-success px-4 py-2 rounded-full shadow-lg border border-gray-100 text-sm font-bold">
-        +{{ quiz.score }} XP
+        +{{ score }} XP
       </div>
       
       <div class="message">
