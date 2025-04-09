@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuizStore } from '@/stores/quiz';
+import ConfettiExplosion from 'vue-confetti-explosion';
 import Container from '@/components/Container.vue';
 import Button from '@/components/Button.vue';
 
@@ -14,6 +15,7 @@ const quiz = computed(() => quizStore.quizResult);
 const score = ref(0);
 const percentage = ref(0);
 const finalPercentage = ref(0);
+const showConfetti = ref(false);
 
 const animateNumber = (targetRef, finalValue, formatFn = (v) => Math.round(v)) => {
   let currentValue = targetRef.value || 0;
@@ -41,6 +43,12 @@ onMounted(async () => {
 
     animateNumber(percentage, finalPercentage.value);
     animateNumber(score, quiz.value.score);
+
+    setTimeout(() => {
+      if (finalPercentage.value >= 80) {
+        showConfetti.value = true;
+      }
+    }, 450);
   }
 });
 
@@ -59,6 +67,15 @@ const resultMessage = computed(() => {
 
 <template>
   <Container>
+    <ConfettiExplosion
+      v-if="showConfetti"
+      :stage-width="1200"
+      :force="0.6"
+      :particle-count="200"
+      :colors="['#7b63dd', '#61cdb9', '#facc15', '#f87171']"
+      class="absolute top-0 left-0 w-full h-full z-10"
+    />
+
     <div v-if="quiz" class="flex flex-col items-center justify-center mt-20 gap-6 text-center px-4">
       <div class="relative w-32 h-32">
         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
