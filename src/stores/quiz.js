@@ -35,6 +35,7 @@ export const useQuizStore = defineStore('quiz', () => {
       await fn();
     } catch (err) {
       console.error('Erro na operação:', err);
+      throw err;
     } finally {
       isLoading.value = false;
     }

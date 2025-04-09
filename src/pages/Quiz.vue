@@ -5,8 +5,8 @@ import { RadioGroup, RadioGroupLabel, RadioGroupOption, } from '@headlessui/vue'
 import Container from '@/components/Container.vue';
 import QuizHeader from '@/components/QuizHeader.vue';
 import QuestionOption from '@/components/QuestionOption.vue';
-import Actions from '@/components/Actions.vue';
-import Loader from '@/components/Loader.vue';
+import NavActions from '@/components/NavActions.vue';
+import PageLoader from '@/components/PageLoader.vue';
 import Toast from '@/components/Toast.vue';
 
 const {
@@ -33,9 +33,7 @@ onMounted(async () => {
 
 <template>
   <Container>
-    <div v-if="isLoading" class="flex flex-col items-center justify-center w-full h-screen">
-      <Loader color="primary" />
-    </div>
+    <PageLoader :visible="isLoading" />
 
     <div v-if="!isLoading && quiz" class="quiz-container flex flex-col items-start w-full">
       <QuizHeader
@@ -71,7 +69,7 @@ onMounted(async () => {
         </RadioGroupOption>
       </RadioGroup>
 
-      <Actions
+      <NavActions
         class="mt-5"
         :text-left="currentQuestionIndex === 0 ? 'Voltar' : 'Anterior'"
         :text-right="isLastQuestion ? 'Finalizar' : 'Próxima'"

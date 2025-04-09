@@ -16,8 +16,8 @@ import Header from '@/components/Header.vue';
 import UserStats from '@/components/UserStats.vue';
 import Text from '@/components/Text.vue';
 import QuizCard from '@/components/QuizCard.vue';
-import Loader from '@/components/Loader.vue';
-import Actions from '@/components/Actions.vue';
+import PageLoader from '@/components/PageLoader.vue';
+import NavActions from '@/components/NavActions.vue';
 import Toast from '@/components/Toast.vue';
 
 // Router & stores
@@ -37,7 +37,14 @@ const signOut = async () => {
 };
 
 onMounted(async () => {
-  await quizStore.fetchAllQuizzesWithScores();
+  try {
+    await quizStore.fetchAllQuizzesWithScores();
+  } catch (error) {
+    handleToast({
+      type: 'error',
+      message: 'Ocorreu um erro ao carregar os quizzes. Tente novamente mais tarde.',
+    });
+  }
 });
 </script>
 
@@ -49,9 +56,7 @@ onMounted(async () => {
   </Header>
 
   <Container>
-    <div v-if="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-white/80">
-      <Loader color="primary" />
-    </div>
+    <PageLoader :visible="isLoading" />
 
     <Text
       v-if="!isLoading && !quizzes.length"
@@ -75,7 +80,7 @@ onMounted(async () => {
       />
     </div>
 
-    <Actions
+    <NavActions
       v-if="!isLoading"
       class="mt-5"
       text-left="Sair"
