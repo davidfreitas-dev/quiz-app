@@ -1,5 +1,6 @@
 <script setup>
-import { CheckCircleIcon } from '@heroicons/vue/24/solid';
+import { computed } from 'vue';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/solid';
 import { RadioGroupLabel } from '@headlessui/vue';
 
 const props = defineProps({
@@ -11,10 +12,51 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  showResultIcons: {
+    type: Boolean,
+    default: false,
+  },
+  correctAnswer: {
+    type: String,
+    default: '',
+  },
   getOptionClass: {
     type: Function,
     default: () => () => '',
   },
+});
+
+const iconToShow = computed(() => {
+  const { showResultIcons, checked, option, correctAnswer } = props;
+
+  const isCorrectAnswer = option.option === correctAnswer;
+
+  if (showResultIcons) {
+    if (isCorrectAnswer) {
+      return {
+        icon: CheckCircleIcon,
+        class: 'text-success',
+      };
+    }
+
+    if (checked && !isCorrectAnswer) {
+      return {
+        icon: XCircleIcon,
+        class: 'text-red-400',
+      };
+    }
+
+    return null;
+  }
+
+  if (checked) {
+    return {
+      icon: CheckCircleIcon,
+      class: '',
+    };
+  }
+
+  return null;
 });
 </script>
 
@@ -25,10 +67,12 @@ const props = defineProps({
         {{ option.option }}. {{ option.desc }}
       </RadioGroupLabel>
     </div>
-      
-    <CheckCircleIcon
-      v-if="checked"
-      class="h-6 w-6"
+
+    <component
+      v-if="iconToShow"
+      :is="iconToShow.icon"
+      :class="iconToShow.class"
+      class="w-6 h-6"
     />
   </div>
 </template>

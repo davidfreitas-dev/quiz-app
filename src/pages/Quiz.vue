@@ -11,6 +11,7 @@ import Toast from '@/components/Toast.vue';
 
 const {
   quiz,
+  isQuizDone,
   isLoading,
   currentQuestionIndex,
   currentQuestion,
@@ -64,6 +65,8 @@ onMounted(async () => {
           <QuestionOption
             :option="option"
             :checked="checked"
+            :show-result-icons="isQuizDone"
+            :correct-answer="currentQuestion.answer"
             :get-option-class="computeOptionClass"
           />
         </RadioGroupOption>

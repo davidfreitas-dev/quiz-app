@@ -156,16 +156,30 @@ export function useQuiz() {
       isCurrentQuestionReady.value &&
       option?.option === currentQuestion.value.answer;
   
-    const selectedClass = checked
-      ? 'bg-primary-light text-primary'
-      : 'bg-light';
+    const isWrongSelected =
+      isQuizDone.value &&
+      checked &&
+      !isCorrectAnswer;
+  
+    const selectedClass = !isQuizDone.value
+      ? checked
+        ? 'bg-primary-light text-primary'
+        : 'bg-light'
+      : '';
   
     const correctAnswerClass = isCorrectAnswer
       ? 'text-success bg-success-light'
       : '';
   
-    return [baseClass, selectedClass, correctAnswerClass].join(' ').trim();
-  };  
+    const wrongAnswerClass = isWrongSelected
+      ? 'text-red-400 bg-red-50'
+      : '';
+  
+    return [baseClass, selectedClass, correctAnswerClass, wrongAnswerClass]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+  };    
 
   return {
     quiz,
@@ -178,8 +192,6 @@ export function useQuiz() {
     toastData,
     toast,
     fetchQuiz,
-    markSelectedOptions,
-    markQuizAsCompleted,
     selectOptionByValue,
     computeOptionClass,
     getCurrentSelectedOption,
