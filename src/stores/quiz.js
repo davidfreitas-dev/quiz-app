@@ -1,11 +1,10 @@
-import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import { defineStore, storeToRefs } from 'pinia';
 import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
-import { useStorage } from '@/use/useStorage';
+import { useUserStore } from '@/stores/user'; 
 
 export const useQuizStore = defineStore('quiz', () => {
-  const user = ref(null);
   const quiz = ref(null);
   const quizzes = ref([]);
   const quizResult = ref(null);
@@ -15,11 +14,7 @@ export const useQuizStore = defineStore('quiz', () => {
   const isQuizDone = ref(false);
   const isLoading = ref(true);
 
-  const initUser = () => {
-    user.value = useStorage().getStorage('user');
-  };
-
-  initUser();
+  const { user } = storeToRefs(useUserStore()); 
 
   const totalScore = computed(() =>
     quizzes.value.reduce((acc, quiz) => acc + (quiz.score || 0), 0)
@@ -149,7 +144,6 @@ export const useQuizStore = defineStore('quiz', () => {
     isQuizDone,
     totalScore,
     completedCount,
-    initUser,
     fetchQuizById,
     fetchAllQuizzesWithScores,
     submitQuizResult,

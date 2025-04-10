@@ -1,104 +1,83 @@
+import { ref } from 'vue';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from 'firebase/auth';
+import { useException } from '@/use/useException';
+import { useToast } from '@/use/useToast';
 
 export function useAuth() {
-  const signIn = async (payload) => {
-    let result;
+  const isLoading = ref(false);
 
-    const auth = getAuth();
+  const { handleException, exception } = useException();
+  const { toast, toastData, handleToast } = useToast();
 
-    await signInWithEmailAndPassword(auth, payload.email, payload.password)
-      .then((res) => {
-        result = {
-          status: 'success',
-          message: 'Logado com sucesso!',
-          data: auth.currentUser
-        };
-      })
-      .catch((err) => {
-        result = {
-          code: err.code,
-          status: 'error',
-          message: err.message
-        };
-      });
-
-    return result;
+  const withLoading = async (fn) => {
+    isLoading.value = true;    
+    try {
+      return await fn();
+    } catch (err) {
+      handleException(err.code);
+      handleToast('error', exception.value);
+    } finally {
+      isLoading.value = false;
+    }
   };
 
-  const signUp = async (payload) => {
-    let result;
-
+  const signIn = async ({ email, password }) => {
     const auth = getAuth();
 
-    await createUserWithEmailAndPassword(auth, payload.email, payload.password)
-      .then((res) => {
-        result = {
-          status: 'success',
-          message: 'Logado com sucesso!',
-          data: auth.currentUser
-        };
-      })
-      .catch((err) => {
-        result = {
-          code: err.code,
-          status: 'error',
-          message: err.message
-        };
-      });
+    return withLoading(async () => {
+      await signInWithEmailAndPassword(auth, email, password);
+      return {
+        status: 'success',
+        message: 'Logado com sucesso!',
+        data: auth.currentUser,
+      };
+    });
+  };
 
-    return result;
+  const signUp = async ({ email, password }) => {
+    const auth = getAuth();
+
+    return withLoading(async () => {
+      await createUserWithEmailAndPassword(auth, email, password);
+      return {
+        status: 'success',
+        message: 'Usuário criado com sucesso!',
+        data: auth.currentUser,
+      };
+    });
   };
 
   const passwordReset = async (email) => {
-    let result;
-
     const auth = getAuth();
 
-    await sendPasswordResetEmail(auth, email)
-      .then((res) => {
-        result = {
-          status: 'success',
-          message: 'Link de recuperação enviado com sucesso!'
-        };
-      })
-      .catch((err) => {
-        result = {
-          code: err.code,
-          status: 'error',
-          message: err.message
-        };
-      });
-
-    return result;
+    return withLoading(async () => {
+      await sendPasswordResetEmail(auth, email);
+      return {
+        status: 'success',
+        message: 'Link de recuperação enviado com sucesso!',
+      };
+    });
   };
 
   const logOut = async () => {
-    let result;
-
     const auth = getAuth();
 
-    await signOut(auth)
-      .then((res) => {
-        result = {
-          status: 'success',
-          message: 'Logout efetuado com sucesso!'
-        };
-      })
-      .catch((err) => {
-        result = {
-          code: err.code,
-          status: 'error',
-          message: err.message
-        };
-      });
-
-    return result;
+    return withLoading(async () => {
+      await signOut(auth);
+      return {
+        status: 'success',
+        message: 'Logout efetuado com sucesso!',
+      };
+    });
   };
 
   return {
+    toast,
+    toastData,
+    isLoading,
     signUp,
     signIn,
     passwordReset,
-    logOut
+    logOut,
   };
 }

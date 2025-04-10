@@ -1,12 +1,10 @@
 <script setup>
-import { ref, reactive } from 'vue';
-import { doc, setDoc } from 'firebase/firestore';
-import { db } from '@/services/firebase-firestore';
-import { useAuth } from '@/use/useAuth';
-import { useStorage } from '@/use/useStorage';
-import { useException } from '@/use/useException';
-import { useToast } from '@/use/useToast';
+import { reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import { useUserStore } from '@/stores/user';
+import { useAuth } from '@/use/useAuth';
+
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
 import TextInput from '@/components/TextInput.vue';
@@ -15,13 +13,9 @@ import GoogleButton from '@/components/GoogleButton.vue';
 import Toast from '@/components/Toast.vue';
 import Loader from '@/components/Loader.vue';
 
-const saveData = async (userData) => {
-  setStorage('user', userData);
-  
-  await setDoc(doc(db, 'users', userData.id), userData);
-};
-
-const isLoading = ref(false);
+const router = useRouter();
+const userStore = useUserStore();
+const { isLoading, toast, toastData, signUp } = useAuth();
 
 const formData = reactive({
   name: '',
@@ -29,47 +23,26 @@ const formData = reactive({
   password: ''
 });
 
-const router = useRouter();
+const invalidForm = computed(() => !formData.name || !formData.email || !formData.password);
 
-const register = async () => {
-  isLoading.value = true;
+const register = async (event) => {
+  event.preventDefault();
+
+  if (invalidForm.value) return;
 
   const response = await signUp(formData);
 
-  if (response.status == 'success') {
-    const userData = {
+  try {
+    await userStore.saveUser({
       id: response.data.uid,
       email: response.data.email,
       name: formData.name
-    };
-    
-    saveData(userData);
-
+    });
     router.push('/');
-  } else {
-    handleException(response.code);
-    
-    handleToast(response.status, exception);
+  } catch (error) {
+    console.log('Error: ', error);
   }
-
-  isLoading.value = false;
 };
-
-const validateForm = (event) => {
-  event.preventDefault();
-
-  if (!formData.name || !formData.email || !formData.password) {
-    handleToast('error', 'Preencha todos os campos.');
-    return;
-  } 
-  
-  register();
-};
-
-const { signUp } = useAuth();
-const { setStorage } = useStorage();
-const { handleException, exception } = useException();
-const { toast, toastData, handleToast } = useToast();
 </script>
 
 <template>
@@ -80,23 +53,18 @@ const { toast, toastData, handleToast } = useToast();
         text="Bem-vindo 👋"
         class="mt-4"
       />
-
-      <Text 
+      <Text
         size="md"
         text="Cadastre-se e participe agora mesmo!"
         class="mt-1"
       />
     </header>
 
-    <form
-      @submit="validateForm"
-      class="flex flex-col gap-4 items-stretch w-full mt-10"
-    >
+    <form class="flex flex-col gap-4 items-stretch w-full mt-10" @submit="register($event)">
       <div class="flex flex-col gap-3">
         <label class="font-semibold">
           Nome e sobrenome
         </label>
-
         <TextInput
           v-model="formData.name"
           type="text"
@@ -109,7 +77,6 @@ const { toast, toastData, handleToast } = useToast();
         <label class="font-semibold">
           Endereço de e-mail
         </label>
-
         <TextInput
           v-model="formData.email"
           type="email"
@@ -122,17 +89,16 @@ const { toast, toastData, handleToast } = useToast();
         <label class="font-semibold">
           Sua senha
         </label>
-
         <TextInput
           v-model="formData.password"
           type="password"
           icon="LockClosedIcon"
           text="**********"
-          @on-keyup-enter="validateForm"
+          @on-keyup-enter="register($event)"
         />
       </div>
 
-      <Button class="mt-4">
+      <Button class="mt-4" :disabled="invalidForm">
         <Loader v-if="isLoading" />
         <span v-else>Cadastrar na plataforma</span>
       </Button>
@@ -143,8 +109,8 @@ const { toast, toastData, handleToast } = useToast();
     <footer class="flex flex-col items-center gap-4 mt-8">
       <router-link to="/forgot">
         <Text
-          :size="'sm'"
-          :text="'Esqueceu sua senha?'"
+          size="sm"
+          text="Esqueceu sua senha?"
           class="text-primary cursor-pointer text-brand-hover underline"
         />
       </router-link>
@@ -158,9 +124,6 @@ const { toast, toastData, handleToast } = useToast();
       </router-link>
     </footer>
 
-    <Toast
-      ref="toast"
-      :toast-data="toastData"
-    />
+    <Toast ref="toast" :toast-data="toastData" />
   </div>
 </template>

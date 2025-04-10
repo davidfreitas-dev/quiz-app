@@ -13,7 +13,7 @@ const imageSrc = computed(() => props.image || new URL('../assets/user.png', imp
 
 <template>
   <router-link
-    to="/settings"
+    to="/profile"
     class="block w-12 h-12 rounded-full overflow-hidden"
   >
     <img

@@ -5,6 +5,10 @@ export function useException() {
 
   const handleException = (errCode) => {
     switch (errCode) {
+    case 'auth/invalid-login-credentials':
+      exception.value = 'Credenciais de login inválidas.';
+      break;
+
     case 'auth/invalid-email':
       exception.value = 'E-mail inválido.';
       break;

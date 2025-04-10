@@ -1,12 +1,8 @@
 <script setup>
-import { ref, reactive } from 'vue';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/services/firebase-firestore';
+import { reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '@/use/useAuth';
-import { useException } from '@/use/useException';
-import { useStorage } from '@/use/useStorage';
-import { useToast } from '@/use/useToast';
+
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
 import TextInput from '@/components/TextInput.vue';
@@ -15,55 +11,26 @@ import GoogleButton from '@/components/GoogleButton.vue';
 import Toast from '@/components/Toast.vue';
 import Loader from '@/components/Loader.vue';
 
-const getUser = async (userId) => {
-  const docSnap = await getDoc(doc(db, 'users', userId));  
-  const userData = docSnap.exists() ? docSnap.data() : undefined;
+const router = useRouter();
 
-  setStorage('user', userData);
-};
-
-const isLoading = ref(false);
+const { isLoading, toast, toastData, signIn } = useAuth();
 
 const formData = reactive({
   email: '',
   password: ''
 });
 
-const router = useRouter();
+const invalidForm = computed(() => !formData.email || !formData.password);
 
-const login = async () => {
-  isLoading.value = true;
-
-  const response = await signIn(formData);
-
-  if (response.status == 'success') {
-    await getUser(response.data.uid);
-
-    router.push('/');
-  } else {
-    handleException(response.code);
-    
-    handleToast(response.status, exception);
-  }
-
-  isLoading.value = false;
-};
-
-const validateForm = (event) => {
+const login = async (event) => {
   event.preventDefault();
 
-  if (!formData.email || !formData.password) {
-    handleToast('error', 'Informe seu e-mail e senha.');
-    return;
-  }  
+  if (invalidForm.value) return;
 
-  login();
+  await signIn(formData);
+
+  router.push('/');
 };
-
-const { signIn } = useAuth();
-const { setStorage } = useStorage();
-const { handleException, exception } = useException();
-const { toast, toastData, handleToast } = useToast();
 </script>
 
 <template>
@@ -82,15 +49,9 @@ const { toast, toastData, handleToast } = useToast();
       />
     </header>
 
-    <form
-      @submit="validateForm"
-      class="flex flex-col gap-4 items-stretch w-full mt-10"
-    >
+    <form class="flex flex-col gap-4 items-stretch w-full mt-10" @submit="login($event)">
       <div class="flex flex-col gap-3">
-        <label
-          class="font-semibold"
-          for="lblEmail"
-        >
+        <label class="font-semibold">
           Endereço de e-mail
         </label>
 
@@ -103,10 +64,7 @@ const { toast, toastData, handleToast } = useToast();
       </div>
 
       <div class="flex flex-col gap-3">
-        <label
-          class="font-semibold"
-          for="lblPassword"
-        >
+        <label class="font-semibold">
           Sua senha
         </label>
 
@@ -115,11 +73,11 @@ const { toast, toastData, handleToast } = useToast();
           type="password"
           icon="LockClosedIcon"
           text="**********"
-          @on-keyup-enter="validateForm"
+          @on-keyup-enter="login($event)"
         />
       </div>
 
-      <Button class="mt-4">
+      <Button class="mt-4" :disabled="invalidForm">
         <Loader v-if="isLoading" />
         <span v-else>Entrar na plataforma</span>
       </Button>
@@ -145,9 +103,6 @@ const { toast, toastData, handleToast } = useToast();
       </router-link>
     </footer>
 
-    <Toast
-      ref="toast"
-      :toast-data="toastData"
-    />
+    <Toast ref="toast" :toast-data="toastData" />
   </div>
 </template>

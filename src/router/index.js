@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { useUserStore } from '@/stores/user';
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -51,6 +52,14 @@ const router = createRouter({
         requiresAuth: true
       }
     },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('../pages/Profile.vue'),
+      meta: {
+        requiresAuth: true
+      }
+    },
   ],
   scrollBehavior(to, from, savedPosition) {
     // always scroll to top
@@ -71,8 +80,12 @@ const getCurrentUser = () => {
 };
 
 router.beforeEach(async (to, from, next) => {
+  const userStore = useUserStore();
+
   if (to.matched.some((record) => record.meta.requiresAuth)) {
-    if (await getCurrentUser()) {
+    const user = await getCurrentUser();
+    if (user) {
+      await userStore.fetchUserData(user.uid);
       next();
     } else {
       next('/signin');

@@ -6,8 +6,6 @@ import { useRouter } from 'vue-router';
 import { useQuizStore } from '@/stores/quiz';
 
 // Internal composables
-import { useAuth } from '@/use/useAuth';
-import { useStorage } from '@/use/useStorage';
 import { useToast } from '@/use/useToast';
 
 // UI Components
@@ -17,24 +15,14 @@ import UserStats from '@/components/UserStats.vue';
 import Text from '@/components/Text.vue';
 import QuizCard from '@/components/QuizCard.vue';
 import PageLoader from '@/components/PageLoader.vue';
-import NavActions from '@/components/NavActions.vue';
+import Button from '@/components/Button.vue';
 import Toast from '@/components/Toast.vue';
 
 // Router & stores
 const router = useRouter();
 const quizStore = useQuizStore();
-const { logOut } = useAuth();
-const { removeStorage } = useStorage();
 const { toast, toastData, handleToast } = useToast();
 const { user, quizzes, isLoading, totalScore } = storeToRefs(quizStore);
-
-const signOut = async () => {
-  const response = await logOut();
-  if (response.status === 'success') {
-    removeStorage('user');
-    router.push('/signin');
-  }
-};
 
 onMounted(async () => {
   try {
@@ -80,14 +68,13 @@ onMounted(async () => {
       />
     </div>
 
-    <NavActions
+    <Button
       v-if="!isLoading"
-      class="mt-5"
-      text-left="Sair"
-      text-right="Ranking"
-      @on-handle-left="signOut"
-      @on-handle-right="router.push('/ranking')"
-    />
+      size="block"
+      @click="router.push('/ranking')"
+    >
+      Ranking
+    </Button>
     
     <Toast ref="toast" :toast-data="toastData" />
   </Container>

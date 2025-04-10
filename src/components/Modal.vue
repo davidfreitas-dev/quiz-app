@@ -4,7 +4,7 @@ import { XMarkIcon } from '@heroicons/vue/24/solid';
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
 import Button from '@/components/Button.vue';
 
-const emit = defineEmits(['onModalClose']);
+const emit = defineEmits(['onModalConfirm', 'onModalClose']);
 
 const open = ref(false);
 
@@ -78,7 +78,7 @@ defineExpose({
               <!-- Ações -->
               <slot name="actions">
                 <div class="flex justify-center gap-3">
-                  <Button color="primary" @click="closeModal">
+                  <Button color="primary" @click="emit('onModalConfirm')">
                     Confirmar
                   </Button>
                   <Button color="outline" @click="closeModal">
