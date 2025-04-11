@@ -41,59 +41,79 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="bg-primary text-white p-5 mb-5 flex flex-col">
+  <div class="bg-primary text-white p-5 pb-0 mb-5 flex flex-col">
     <div class="relative flex items-center justify-center h-12">
       <BackButton route="/" class="absolute left-0" />
-      <Heading size="lg" text="Ranking" />
+      <Heading
+        size="lg"
+        text="Ranking"
+        class="text-white"
+      />
     </div>
   
-    <div v-if="topThree.length === 3" class="podio w-full flex justify-center items-end pt-5 pb-10">
+    <div v-if="topThree.length === 3" class="w-full flex justify-center items-end pt-3">
       <!-- 2º lugar -->
-      <div class="flex flex-col items-center w-28 translate-y-3">
+      <div class="flex flex-col items-center w-full">
         <img
           :src="topThree[1].image"
-          class="w-16 h-16 rounded-full border-4 border-gray-200 shadow-md"
+          class="w-16 h-16 rounded-full border-4 border-white shadow-md z-10"
           alt="Segundo colocado"
         >
         <p class="text-sm mt-2 font-semibold text-center">
           {{ splitUserName(topThree[1].name) }}
         </p>
-        <div class="text-xs bg-gray-100 px-4 py-2 rounded-lg mt-1 shadow text-gray-800 font-medium">
-          {{ topThree[1].score }} pontos
+        <div class="text-xs my-1 px-4 py-1.5 rounded-lg bg-white text-primary font-bold">
+          {{ topThree[1].score }} XP
+        </div>
+        <div class="bg-[#aea7ed] text-white px-3 py-1 mt-2 font-medium w-full text-center h-[70px]">
+          <div class="flex flex-col justify-center h-full">
+            <span class="text-3xl font-bold">2</span>
+          </div>
         </div>
       </div>
 
       <!-- 1º lugar -->
-      <div class="flex flex-col items-center w-28">
+      <div class="flex flex-col items-center w-full">
         <img
           :src="topThree[0].image"
-          class="w-[80px] h-[80px] rounded-full border-4 border-yellow-400 shadow-lg"
+          class="w-20 h-20 rounded-full border-4 border-yellow-400 shadow-md z-10"
           alt="Primeiro colocado"
         >
         <p class="text-sm mt-2 font-bold text-center">
           {{ splitUserName(topThree[0].name) }}
         </p>
-        <div class="text-xs bg-gray-100 text-gray-800 px-4 py-2 rounded-lg mt-1 shadow font-semibold">
-          {{ topThree[0].score }} pontos
+        <div class="text-xs my-1 px-4 py-1.5 rounded-lg bg-white text-primary font-bold">
+          {{ topThree[0].score }} XP
+        </div>
+        <div class="bg-[#9a90e6] text-white px-3 py-1 mt-2 font-semibold w-full text-center h-[90px]">
+          <div class="flex flex-col justify-center h-full">
+            <span class="text-3xl font-bold">1</span>
+          </div>
         </div>
       </div>
 
       <!-- 3º lugar -->
-      <div class="flex flex-col items-center w-28 translate-y-7">
+      <div class="flex flex-col items-center w-full">
         <img
           :src="topThree[2].image"
-          class="w-16 h-16 rounded-full border-4 border-gray-200 shadow-md"
+          class="w-16 h-16 rounded-full border-4 border-white shadow-md z-10"
           alt="Terceiro colocado"
         >
-        <p class="text-sm mt-2 font-semibold text-center truncate">
+        <p class="text-sm mt-2 font-semibold text-center">
           {{ splitUserName(topThree[2].name) }}
         </p>
-        <div class="text-xs bg-gray-100 px-4 py-2 rounded-lg mt-1 shadow text-gray-800 font-medium">
-          {{ topThree[2].score }} pontos
+        <div class="text-xs my-1 px-4 py-1.5 rounded-lg bg-white text-primary font-bold">
+          {{ topThree[2].score }} XP
+        </div>
+        <div class="bg-[#aea7ed] text-white px-3 py-1 mt-2 font-medium w-full text-center h-[55px]">
+          <div class="flex flex-col justify-center h-full">
+            <span class="text-3xl font-bold">3</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
+  
   <Container>
     <!-- RANKING COMPLETO -->
     <div class="ranking w-full space-y-3 mb-5">
