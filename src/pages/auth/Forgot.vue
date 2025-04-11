@@ -1,8 +1,8 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useAuth } from '@/use/useAuth';
 import { useException } from '@/use/useException';
-import { useToast } from '@/use/useToast';
+
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
 import TextInput from '@/components/TextInput.vue';
@@ -10,39 +10,19 @@ import Button from '@/components/Button.vue';
 import Toast from '@/components/Toast.vue';
 import Loader from '@/components/Loader.vue';
 
-const isLoading = ref(false);
+const { isLoading, toast, toastData, passwordReset } = useAuth();
 
 const email = ref('');
 
-const handleRecover = async () => {
-  isLoading.value = true;
+const invalidForm = computed(() => !email.value);
 
-  const response = await passwordReset(email.value);
-
-  if (response.status == 'success') {
-    handleToast(response.status, response.message);
-  } else {
-    handleException(response.code);
-    handleToast(response.status, exception);
-  }
-
-  isLoading.value = false;
-};
-
-const validateForm = (event) => {
+const requestPasswordReset = async (event) => {
   event.preventDefault();
 
-  if (!email.value) {
-    handleToast('error', 'Informe seu e-mail.');
-    return;
-  }
+  if (invalidForm.value) return;
   
-  handleRecover();
+  await passwordReset(email.value);
 };
-
-const { passwordReset } = useAuth();
-const { handleException, exception } = useException();
-const { toast, toastData, handleToast } = useToast();
 </script>
 
 <template>
@@ -61,15 +41,9 @@ const { toast, toastData, handleToast } = useToast();
       />
     </header>
 
-    <form
-      @submit="validateForm"
-      class="flex flex-col gap-4 items-stretch w-full mt-10"
-    >
+    <form class="flex flex-col gap-4 items-stretch w-full mt-10" @submit="requestPasswordReset($event)">
       <div class="flex flex-col gap-3">
-        <label
-          class="font-semibold"
-          for="lblEmail"
-        >
+        <label class="font-semibold">
           Endereço de e-mail
         </label>
 
@@ -78,11 +52,11 @@ const { toast, toastData, handleToast } = useToast();
           type="email"
           icon="EnvelopeIcon"
           text="johndoe@email.com"
-          @on-keyup-enter="validateForm"
+          @on-keyup-enter="requestPasswordReset($event)"
         />
       </div>
 
-      <Button class="mt-4">
+      <Button class="mt-4" :disabled="invalidForm">
         <Loader v-if="isLoading" />
         <span v-else>Enviar link de recuperação</span>
       </Button>
@@ -98,9 +72,6 @@ const { toast, toastData, handleToast } = useToast();
       </router-link>
     </footer>
 
-    <Toast
-      ref="toast"
-      :toast-data="toastData"
-    />
+    <Toast ref="toast" :toast-data="toastData" />
   </div>
 </template>

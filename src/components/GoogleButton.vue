@@ -1,52 +1,27 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '@/services/firebase-firestore';
-import { useStorage } from '@/use/useStorage';
-
-const getUser = async (userId) => {
-  const docSnap = await getDoc(doc(db, 'users', userId)); 
-
-  return docSnap.exists() ? docSnap.data() : undefined;
-};
-
-const saveData = async (userData) => {
-  const usersRef = doc(db, 'users', userData.id);
-
-  await setDoc(usersRef, userData);
-};
+import { useUserStore } from '@/stores/user';
+import { useAuth } from '@/use/useAuth';
 
 const router = useRouter();
+const userStore = useUserStore();
+const { isLoading, toast, toastData, signInWithGoogle } = useAuth();
 
-const signInWithGoogle = () => {
-  const provider = new GoogleAuthProvider();    
+const logInWithGoogle = async () => {
+  const response = await signInWithGoogle();
 
-  signInWithPopup(getAuth(), provider)
-    .then(async (result) => {
-      let userData = await getUser(result.user.uid);
-        
-      if (!userData) {
-        userData = {
-          id: result.user.uid,
-          email: result.user.email,
-          name: result.user.displayName,
-          image: result.user.photoURL
-        };
-
-        saveData(userData);
-      }
-
-      setStorage('user', userData);
-
-      router.push('/');
-    })
-    .catch((err) => {
-      console.log(err);
+  try {
+    await userStore.saveUser({
+      id: response.data.uid,
+      email: response.data.email,
+      name: response.data.displayName,
+      image: response.data.photoURL
     });
+    router.push('/');
+  } catch (error) {
+    console.log('Error: ', error);
+  }
 };
-
-const { setStorage } = useStorage();
 </script>
 
 <template>
@@ -59,7 +34,7 @@ const { setStorage } = useStorage();
   <button
     type="button"
     class="flex flex-row justify-center items-center gap-2 cursor-pointer py-3 px-4 shadow-lg border border-light bg-white rounded-xl font-semibold text-black text-sm w-full h-12 transition-colors"
-    @click="signInWithGoogle"
+    @click="logInWithGoogle"
   >
     <img
       src="@/assets/google.svg"

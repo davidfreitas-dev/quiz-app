@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from 'firebase/auth';
 import { useException } from '@/use/useException';
 import { useToast } from '@/use/useToast';
 
@@ -71,6 +71,20 @@ export function useAuth() {
     });
   };
 
+  const signInWithGoogle = async () => {
+    const auth = getAuth();
+    const provider = new GoogleAuthProvider();
+
+    return withLoading(async () => {
+      const result = await signInWithPopup(auth, provider);
+      return {
+        status: 'success',
+        message: 'Login com Google realizado com sucesso!',
+        data: result.user,
+      };
+    });
+  };
+
   return {
     toast,
     toastData,
@@ -79,5 +93,6 @@ export function useAuth() {
     signIn,
     passwordReset,
     logOut,
+    signInWithGoogle
   };
 }
