@@ -1,20 +1,25 @@
 <script setup>
 import { ref } from 'vue';
-import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
-import { ExclamationTriangleIcon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/solid';
+import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user';
 import { useAuth } from '@/use/useAuth';
+import { ExclamationTriangleIcon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/solid';
+
 import Container from '@/components/Container.vue';
 import Avatar from '@/components/Avatar.vue';
 import BackButton from '@/components/BackButton.vue';
 import Heading from '@/components/Heading.vue';
+import UserStats from '@/components/UserStats.vue';
 import Button from '@/components/Button.vue';
 import Modal from '@/components/Modal.vue';
 
 const router = useRouter();
-const { user } = storeToRefs(useUserStore()); 
+
 const { logOut } = useAuth();
+
+const { user } = storeToRefs(useUserStore()); 
+
 const modalRef = ref(null);
 
 const showModal = () => {
@@ -47,20 +52,25 @@ const signOut = async () => {
       </div>
     </div>
         
-    <div class="absolute left-1/2 -bottom-[90px] transform -translate-x-1/2 w-[90%]">
+    <div class="absolute left-1/2 -bottom-[180px] transform -translate-x-1/2 w-[90%]">
       <div class="relative flex flex-col items-center gap-3 bg-white shadow-lg p-5 rounded-xl pt-12">
         <div class="absolute -top-12 left-1/2 transform -translate-x-1/2">
           <Avatar :image="user.image" class="w-20 h-20 rounded-full" />
         </div>
         <div class="flex flex-col items-center">
           <span class="font-semibold text-lg">{{ user.name }}</span>
-          <span class="text-secondary">{{ user.email }}</span>
+          <span class="text-sm text-secondary">{{ user.email }}</span>
         </div>
+        <UserStats
+          :quizzes="2"
+          :points="18"
+          :ranking="1"
+        />
       </div>
     </div>
   </div>
 
-  <Container class="mt-28">
+  <Container class="mt-48">
     <Button size="block" @click="showModal">
       Encerrar Sessão
       <ArrowRightOnRectangleIcon class="h-5 w-5 ml-3" />
