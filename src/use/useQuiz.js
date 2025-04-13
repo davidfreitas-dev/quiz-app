@@ -149,7 +149,7 @@ export function useQuiz() {
 
   const computeOptionClass = (option, checked) => {
     const baseClass =
-      'flex justify-between items-center gap-2 px-3 w-full h-14 rounded-2xl shadow-sm transition-colors text-dark';
+      'flex justify-between items-center gap-2 px-3 w-full h-14 rounded-2xl shadow-sm transition-colors text-dark bg-light';
   
     const isCorrectAnswer =
       isQuizDone.value &&
@@ -164,7 +164,7 @@ export function useQuiz() {
     const selectedClass = !isQuizDone.value
       ? checked
         ? 'bg-primary-light text-primary'
-        : 'bg-light'
+        : ''
       : '';
   
     const correctAnswerClass = isCorrectAnswer

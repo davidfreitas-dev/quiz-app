@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user';
 import { useAuth } from '@/use/useAuth';
-import { ExclamationTriangleIcon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/solid';
+import { ExclamationTriangleIcon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline';
 
 import Container from '@/components/Container.vue';
 import Avatar from '@/components/Avatar.vue';

@@ -59,7 +59,7 @@ defineExpose({
 
             <div class="p-4 md:p-5 text-center">
               <!-- Ícone (slot opcional) -->
-              <div v-if="$slots.icon" class="flex justify-center mb-4">
+              <div v-if="$slots.icon" class="flex justify-center">
                 <slot name="icon" />
               </div>
 
@@ -71,7 +71,7 @@ defineExpose({
               </div>
 
               <!-- Conteúdo principal -->
-              <div class="modal-body overflow-y-auto text-gray-600 font-medium my-5 p-0.5">
+              <div class="modal-body overflow-y-auto text-gray-600 font-medium my-3 p-0.5">
                 <slot />
               </div>
 
