@@ -14,11 +14,10 @@ const props = defineProps({
 <template>
   <span
     :class="{
-      'text-lg': size === 'sm',
       'text-xl': size === 'md',
       'text-2xl': size === 'lg',
     }"
-    class="text-dark font-bold font-sans"
+    class="font-bold font-sans"
   >
     {{ text }}
   </span>
