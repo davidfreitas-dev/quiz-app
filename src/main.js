@@ -6,6 +6,7 @@ import router from './router';
 
 import './services/firebase-firestore';
 import './style.css';
+import 'animate.css';
 
 const pinia = createPinia();
 const app = createApp(App);
