@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue';
 import { defineStore, storeToRefs } from 'pinia';
-import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, addDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
 import { useUserStore } from '@/stores/user'; 
 
@@ -51,67 +51,6 @@ export const useQuizStore = defineStore('quiz', () => {
     }
   };
 
-  const fetchQuizById = async (id) => {
-    await withLoading(async () => {
-      const q = query(collection(db, 'quizzes'), where('id', '==', Number(id)));
-      const querySnapshot = await getDocs(q);
-      quiz.value = querySnapshot.docs[0]?.data() || null;
-    });
-  };
-
-  const fetchAllQuizzesWithScores = async () => {
-    await withLoading(async () => {
-      const quizSnapshot = await getDocs(collection(db, 'quizzes'));
-      const quizList = quizSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      const userResults = await getDocs(query(
-        collection(db, 'results'),
-        where('iduser', '==', user.value.id)
-      ));
-
-      const resultMap = new Map();
-      userResults.forEach(doc => {
-        const { idquiz, score } = doc.data();
-        resultMap.set(idquiz, score);
-      });
-
-      quizzes.value = quizList.map(quiz => ({
-        ...quiz,
-        score: resultMap.get(quiz.id) ?? null
-      })).sort((a, b) => a.id - b.id);
-    });
-  };
-
-  const submitQuizResult = async ({ quizId, answers, score }) => {
-    await withLoading(async () => {
-      const docRef = doc(collection(db, 'results'));
-      await setDoc(docRef, {
-        idquiz: quizId,
-        iduser: user.value.id,
-        name: user.value.name,
-        answers,
-        score,
-      });
-    });
-  };    
-
-  const fetchQuizResult = async (quizId) => {
-    await withLoading(async () => {
-      const q = query(
-        collection(db, 'results'),
-        where('idquiz', '==', Number(quizId)),
-        where('iduser', '==', user.value.id)
-      );
-  
-      const querySnapshot = await getDocs(q);
-  
-      quizResult.value = querySnapshot.docs[0]?.data() || null;
-    });
-  };  
-
   const fetchUsersAndResults = async () => {
     await withLoading(async () => {
       const usersSnapshot = await getDocs(collection(db, 'users'));
@@ -147,6 +86,73 @@ export const useQuizStore = defineStore('quiz', () => {
     });
   };  
 
+  const fetchAllQuizzesWithScores = async () => {
+    await withLoading(async () => {
+      const quizSnapshot = await getDocs(collection(db, 'quizzes'));
+      const quizList = quizSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const userResults = await getDocs(query(
+        collection(db, 'results'),
+        where('iduser', '==', user.value.id)
+      ));
+
+      const resultMap = new Map();
+      userResults.forEach(doc => {
+        const { idquiz, score } = doc.data();
+        resultMap.set(idquiz, score);
+      });
+
+      quizzes.value = quizList.map(quiz => ({
+        ...quiz,
+        score: resultMap.get(quiz.id) ?? null
+      })).sort((a, b) => a.id - b.id);
+    });
+  };
+
+  const fetchQuizById = async (quizId) => {
+    await withLoading(async () => {
+      const q = query(collection(db, 'quizzes'), where('id', '==', Number(quizId)));
+      const querySnapshot = await getDocs(q);
+      quiz.value = querySnapshot.docs[0]?.data() || null;
+    });
+  };
+
+  const fetchQuizResult = async (quizId) => {
+    await withLoading(async () => {
+      const q = query(
+        collection(db, 'results'),
+        where('idquiz', '==', Number(quizId)),
+        where('iduser', '==', user.value.id)
+      );
+  
+      const querySnapshot = await getDocs(q);
+  
+      quizResult.value = querySnapshot.docs[0]?.data() || null;
+    });
+  };
+
+  const saveQuiz = async (quizData) => {
+    await withLoading(async () => {
+      await addDoc(collection(db, 'quizzes'), quizData);
+    });
+  };
+
+  const submitQuizResult = async ({ quizId, answers, score }) => {
+    await withLoading(async () => {
+      const docRef = doc(collection(db, 'results'));
+      await setDoc(docRef, {
+        idquiz: quizId,
+        iduser: user.value.id,
+        name: user.value.name,
+        answers,
+        score,
+      });
+    });
+  };
+
   return {
     user,
     quiz,
@@ -160,10 +166,11 @@ export const useQuizStore = defineStore('quiz', () => {
     totalScore,
     completedCount,
     scoreSummary,
-    fetchQuizById,
+    fetchUsersAndResults,
     fetchAllQuizzesWithScores,
-    submitQuizResult,
+    fetchQuizById,
     fetchQuizResult,
-    fetchUsersAndResults
+    saveQuiz,
+    submitQuizResult
   };
 });
