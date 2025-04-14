@@ -24,6 +24,21 @@ export const useQuizStore = defineStore('quiz', () => {
     quizzes.value.filter(q => q.score >= 0).length
   );
 
+  const scoreSummary = computed(() => {
+    const completedQuizzes = quizzes.value.filter(q => q.score != null);
+    const totalScore = completedQuizzes.reduce((acc, quiz) => acc + quiz.score, 0);  
+    const totalQuestions = completedQuizzes.reduce((acc, quiz) => acc + quiz.questions.length, 0);
+    const averageScore = completedQuizzes.length > 0 ? Math.round(totalScore / completedQuizzes.length) : 0;
+    const percentage = totalQuestions > 0 
+      ? Math.round((totalScore / totalQuestions) * 100) 
+      : 0;
+  
+    return {
+      average: averageScore,
+      percentage
+    };
+  });   
+
   const withLoading = async (fn) => {
     isLoading.value = true;
     try {
@@ -144,6 +159,7 @@ export const useQuizStore = defineStore('quiz', () => {
     isQuizDone,
     totalScore,
     completedCount,
+    scoreSummary,
     fetchQuizById,
     fetchAllQuizzesWithScores,
     submitQuizResult,

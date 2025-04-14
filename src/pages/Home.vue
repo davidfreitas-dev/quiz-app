@@ -23,16 +23,13 @@ import Toast from '@/components/Toast.vue';
 const router = useRouter();
 const quizStore = useQuizStore();
 const { toast, toastData, handleToast } = useToast();
-const { user, quizzes, isLoading, totalScore } = storeToRefs(quizStore);
+const { user, quizzes, isLoading, scoreSummary } = storeToRefs(quizStore);
 
 onMounted(async () => {
   try {
     await quizStore.fetchAllQuizzesWithScores();
   } catch (error) {
-    handleToast({
-      type: 'error',
-      message: 'Ocorreu um erro ao carregar os quizzes. Tente novamente mais tarde.',
-    });
+    handleToast('error', 'Ocorreu um erro ao carregar os quizzes. Tente novamente mais tarde.');
   }
 });
 </script>
@@ -47,7 +44,7 @@ onMounted(async () => {
           </h3>
           <span class="text-sm text-secondary">1 prova concluída</span>
         </div>
-        <ProgressCircle :percentage="80" :value="8" />
+        <ProgressCircle :percentage="scoreSummary.percentage" :value="scoreSummary.average" />
       </div>
     </template>
   </Header>
