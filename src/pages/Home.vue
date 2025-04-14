@@ -12,6 +12,7 @@ import { useToast } from '@/use/useToast';
 import Container from '@/components/Container.vue';
 import Header from '@/components/Header.vue';
 import UserStats from '@/components/UserStats.vue';
+import ProgressCircle from '@/components/ProgressCircle.vue';
 import Text from '@/components/Text.vue';
 import QuizCard from '@/components/QuizCard.vue';
 import PageLoader from '@/components/PageLoader.vue';
@@ -46,34 +47,7 @@ onMounted(async () => {
           </h3>
           <span class="text-sm text-secondary">1 prova concluída</span>
         </div>
-        <div class="relative w-14 h-14">
-          <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-            <circle
-              cx="50"
-              cy="50"
-              r="45"
-              stroke="#E5E7EB"
-              stroke-width="10"
-              fill="none"
-            />
-            <circle
-              cx="50"
-              cy="50"
-              r="45"
-              stroke="#61cdb9"
-              stroke-width="10"
-              fill="none"
-              stroke-linecap="round"
-              :stroke-dasharray="282.74"
-              :stroke-dashoffset="282.74 - (282.74 * 80 / 100)"
-            />
-          </svg>
-          <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <div class="font-bold">
-              8
-            </div>
-          </div>
-        </div>
+        <ProgressCircle :percentage="80" :value="8" />
       </div>
     </template>
   </Header>
