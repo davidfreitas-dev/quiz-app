@@ -42,7 +42,7 @@ onMounted(async () => {
         :quiz-id="quiz.id"
         :question-id="currentQuestion?.id"
         :total-questions="quiz.questions.length"
-        :question-text="currentQuestion.question"
+        :question-text="currentQuestion.text"
         :progress="progress"
       />
       

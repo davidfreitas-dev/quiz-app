@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue';
 import { defineStore, storeToRefs } from 'pinia';
-import { collection, query, where, getDocs, doc, addDoc, setDoc } from 'firebase/firestore';
+import { collection, doc, addDoc, setDoc, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
 import { useUserStore } from '@/stores/user'; 
 
@@ -89,36 +89,75 @@ export const useQuizStore = defineStore('quiz', () => {
   const fetchAllQuizzesWithScores = async () => {
     await withLoading(async () => {
       const quizSnapshot = await getDocs(collection(db, 'quizzes'));
-      const quizList = quizSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
+      const quizList = [];
+  
+      // Para cada quiz, também buscar as perguntas na subcoleção
+      for (const quizDoc of quizSnapshot.docs) {
+        const quizData = quizDoc.data();
+        const quizId = quizDoc.id;
+        
+        // Busca as perguntas na subcoleção 'questions'
+        const questionsSnapshot = await getDocs(collection(db, `quizzes/${quizId}/questions`));
+        const questions = questionsSnapshot.docs.map(doc => doc.data());
+  
+        quizList.push({
+          id: quizId,
+          ...quizData,
+          questions,  // Adiciona as perguntas ao quiz
+        });
+      }
+  
       const userResults = await getDocs(query(
         collection(db, 'results'),
         where('iduser', '==', user.value.id)
       ));
-
+  
       const resultMap = new Map();
       userResults.forEach(doc => {
         const { idquiz, score } = doc.data();
         resultMap.set(idquiz, score);
       });
-
+  
       quizzes.value = quizList.map(quiz => ({
         ...quiz,
         score: resultMap.get(quiz.id) ?? null
       })).sort((a, b) => a.id - b.id);
     });
-  };
+  };  
 
   const fetchQuizById = async (quizId) => {
     await withLoading(async () => {
-      const q = query(collection(db, 'quizzes'), where('id', '==', Number(quizId)));
-      const querySnapshot = await getDocs(q);
-      quiz.value = querySnapshot.docs[0]?.data() || null;
+      const quizzesSnapshot = await getDocs(
+        query(collection(db, 'quizzes'), where('id', '==', quizId))
+      );
+  
+      if (quizzesSnapshot.empty) {
+        throw new Error('Quiz não encontrado');
+      }
+  
+      const quizDoc = quizzesSnapshot.docs[0];
+      const quizDocRef = doc(db, 'quizzes', quizDoc.id);
+      const questionsSnapshot = await getDocs(query(collection(quizDocRef, 'questions')));
+  
+      if (questionsSnapshot.empty) {
+        throw new Error('Nenhuma pergunta encontrada para este quiz');
+      }
+  
+      const questions = questionsSnapshot.docs
+        .sort((a, b) => Number(a.id) - Number(b.id)) // ordena pelo ID do documento
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+  
+      quiz.value = {
+        ...quizDoc.data(),
+        questions
+      };
+  
+      console.log('QUIZ: ', quiz.value);
     });
-  };
+  };    
 
   const fetchQuizResult = async (quizId) => {
     await withLoading(async () => {

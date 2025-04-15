@@ -9,7 +9,7 @@ const props = defineProps({
     default: 0
   },
   questionId: {
-    type: Number,
+    type: [String, Number],
     default: 0
   },
   totalQuestions: {
