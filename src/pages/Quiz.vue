@@ -41,7 +41,7 @@ onMounted(async () => {
         v-if="currentQuestion"
         :quiz-id="quiz.id"
         :question-id="currentQuestion?.id"
-        :total-questions="quiz.questions.length"
+        :total-questions="quiz.totalQuestions"
         :question-text="currentQuestion.text"
         :progress="progress"
       />

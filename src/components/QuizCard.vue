@@ -43,7 +43,7 @@ const goToQuiz = () => {
         {{ quiz.description }}
       </span>
       <span class="text-sm text-secondary font-normal mt-1">
-        {{ quiz.questions.length }} questões
+        {{ quiz.totalQuestions }} questões
       </span>
     </div>
 
