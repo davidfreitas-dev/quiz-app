@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue';
 import { defineStore, storeToRefs } from 'pinia';
-import { collection, doc, addDoc, setDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, doc, addDoc, setDoc, updateDoc, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
 import { useUserStore } from '@/stores/user'; 
 
@@ -66,8 +66,7 @@ export const useQuizStore = defineStore('quiz', () => {
         id: doc.id,
         ...doc.data()
       }));
-  
-      // Soma dos scores
+      
       for (const user of usersList) {
         const userResults = resultsList.filter(result => result.iduser === user.id);
         user.score = userResults.reduce((acc, r) => acc + (r.score || 0), 0);
@@ -75,8 +74,7 @@ export const useQuizStore = defineStore('quiz', () => {
   
       allUsers.value = usersList;
       allResults.value = resultsList;
-  
-      // Ordenar ranking
+      
       usersResults.value = [...usersList]
         .map(user => ({
           ...user,
@@ -160,16 +158,40 @@ export const useQuizStore = defineStore('quiz', () => {
   };    
 
   const fetchQuizResult = async (quizId) => {
-    await withLoading(async () => {
-      const q = query(
-        collection(db, 'results'),
-        where('idquiz', '==', Number(quizId)),
-        where('iduser', '==', user.value.id)
+    await withLoading(async () => {      
+      const resultsSnapshot = await getDocs(
+        query(
+          collection(db, 'results'),
+          where('idquiz', '==', Number(quizId)),
+          where('iduser', '==', user.value.id)
+        )
       );
   
-      const querySnapshot = await getDocs(q);
+      if (resultsSnapshot.empty) {
+        console.warn('Nenhum resultado encontrado.');
+        return;
+      }
   
-      quizResult.value = querySnapshot.docs[0]?.data() || null;
+      const resultDoc = resultsSnapshot.docs[0];
+      const resultData = resultDoc.data();
+      const resultId = resultDoc.id;
+  
+      const answersSnapshot = await getDocs(collection(resultDoc.ref, 'answers'));
+  
+      if (answersSnapshot.empty) {
+        console.warn('Nenhuma resposta encontrada.');
+        return;
+      }
+  
+      const answers = answersSnapshot.docs
+        .sort((a, b) => Number(a.idquestion) - Number(b.idquestion))
+        .map(doc => doc.data());
+  
+      quizResult.value = {
+        id: resultId,
+        ...resultData,
+        answers
+      };
     });
   };
 
@@ -181,16 +203,21 @@ export const useQuizStore = defineStore('quiz', () => {
 
   const submitQuizResult = async ({ quizId, answers, score }) => {
     await withLoading(async () => {
-      const docRef = doc(collection(db, 'results'));
-      await setDoc(docRef, {
+      const resultRef = doc(collection(db, 'results'));
+      await setDoc(resultRef, {
         idquiz: quizId,
         iduser: user.value.id,
-        name: user.value.name,
-        answers,
-        score,
+        score
       });
+  
+      for (const answer of answers) {
+        await setDoc(doc(collection(resultRef, 'answers'), String(answer.id)), {
+          idquestion: answer.id,
+          option: answer.option
+        });
+      }
     });
-  };
+  }; 
 
   return {
     user,

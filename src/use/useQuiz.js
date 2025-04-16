@@ -32,7 +32,7 @@ export function useQuiz() {
   const markSelectedOptions = (questions, answers) => {
     if (!questions || !answers) return;
     for (const question of questions) {
-      const answer = answers.find(a => a.id == question.id);
+      const answer = answers.find(a => a.idquestion == question.id);
       for (const option of question.options) {
         option.selected = option.option === answer.option;
       }
