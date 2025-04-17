@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user';
 import { useAuth } from '@/use/useAuth';
 

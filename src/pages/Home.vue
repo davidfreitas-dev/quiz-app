@@ -11,7 +11,6 @@ import { useToast } from '@/use/useToast';
 // UI Components
 import Container from '@/components/Container.vue';
 import Header from '@/components/Header.vue';
-import UserStats from '@/components/UserStats.vue';
 import ProgressCircle from '@/components/ProgressCircle.vue';
 import Text from '@/components/Text.vue';
 import QuizCard from '@/components/QuizCard.vue';

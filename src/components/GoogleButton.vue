@@ -5,7 +5,7 @@ import { useAuth } from '@/use/useAuth';
 
 const router = useRouter();
 const userStore = useUserStore();
-const { isLoading, toast, toastData, signInWithGoogle } = useAuth();
+const { signInWithGoogle } = useAuth();
 
 const logInWithGoogle = async () => {
   const response = await signInWithGoogle();

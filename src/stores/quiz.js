@@ -32,14 +32,38 @@ export const useQuizStore = defineStore('quiz', () => {
   const withLoading = async (fn) => {
     isLoading.value = true;
     try {
-      await fn();
+      return await fn();
     } catch (err) {
-      console.error('Erro na operação:', err);
+      console.error('Erro na requisição:', err);
       throw err;
     } finally {
       isLoading.value = false;
     }
   };
+  
+  const getCollectionDocs = async (path) => {
+    const snapshot = await getDocs(collection(db, path));
+    return snapshot.docs.map(doc => ({ 
+      id: doc.id, 
+      ...doc.data()
+    }));
+  };
+  
+  const fetchUserResultsById = async (userId) => {      
+    const resultsSnapshot = await getDocs(collection(db, `users/${userId}/results`));
+    
+    const results = resultsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    const score = results.reduce((total, r) => total + (r.score || 0), 0);
+  
+    return {
+      results,
+      score
+    };
+  };  
 
   const fetchUsersAndResults = async () => {
     await withLoading(async () => {
@@ -74,48 +98,16 @@ export const useQuizStore = defineStore('quiz', () => {
         }))
         .sort((a, b) => b.score - a.score);
     });
-  };     
-
-  const fetchAllQuizzesWithScores = async () => {
-    await withLoading(async () => {
-      const quizList = await fetchQuizzes();
-  
-      const userResultsSnapshot = await getDocs(
-        collection(db, `users/${user.value.id}/results`)
-      );
-  
-      const userResultsList = userResultsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      const resultMap = new Map();
-      userResultsList.forEach(result => {
-        resultMap.set(result.idquiz, result.score);
-      });
-      
-      quizzes.value = quizList
-        .map(quiz => ({
-          ...quiz,
-          score: resultMap.get(quiz.id) ?? null
-        }))
-        .sort((a, b) => a.id - b.id);
-    });
-  };  
+  };
   
   const fetchQuizzes = async () => {
     const quizSnapshot = await getDocs(collection(db, 'quizzes'));
   
     const quizList = await Promise.all(
       quizSnapshot.docs.map(async doc => {
-        const quizId = doc.id;
-        const quizData = doc.data();
-        const questionsSnapshot = await getDocs(collection(db, `quizzes/${quizId}/questions`));
-        const questions = questionsSnapshot.docs.map(q => q.data());
-  
+        const questions = await getCollectionDocs(`quizzes/${doc.id}/questions`);
         return {
-          id: quizId,
-          ...quizData,
+          ...doc.data(),
           totalQuestions: questions.length
         };
       })
@@ -123,6 +115,27 @@ export const useQuizStore = defineStore('quiz', () => {
   
     return quizList;
   };  
+
+  const fetchAllQuizzesWithScores = async () => {
+    await withLoading(async () => {
+      const quizList = await fetchQuizzes();
+  
+      const { results } = await fetchUserResultsById(user.value.id);
+  
+      const resultMap = new Map(
+        results.map(result => [result.idquiz, result.score])
+      );
+  
+      quizzes.value = quizList
+        .map(quiz => ({
+          ...quiz,
+          score: resultMap.get(quiz.id) ?? null
+        }))
+        .sort((a, b) => a.id - b.id);
+
+      console.log(quizzes.value);
+    });
+  };
 
   const fetchQuizById = async (quizId) => {
     await withLoading(async () => {
