@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
 import { useQuizStore } from '@/stores/quiz';
 import { useToast } from '@/use/useToast';
 
@@ -14,29 +15,33 @@ import Toast from '@/components/Toast.vue';
 const route = useRoute();
 const router = useRouter();
 const quizStore = useQuizStore();
+const { quizResult } = storeToRefs(quizStore);
 
-const quiz = computed(() => quizStore.quizResult);
-
-const score = ref(0);
-const percentage = ref(0);
+const resultScore = ref(0);
+const rawPercentage = ref(0);
 const finalPercentage = ref(0);
-const showConfetti = ref(false);
 
 const { toast, toastData, handleToast } = useToast();
 
-const isLoading = ref(true);
+const resultTitle = computed(() => {
+  if (finalPercentage.value < 50) return 'Não desista!';
+  if (finalPercentage.value < 80) return 'Você está quase lá!';
+  return 'Excelente!';
+});
 
-const withLoading = async (fn) => {
-  isLoading.value = true;
-  try {
-    await fn();
-  } catch (err) {
-    console.error('Erro na requisição: ', err);
-    handleToast('error', 'Ocorreu um erro ao carregar o resultado do quiz. Tente novamente mais tarde.');
-  } finally {
-    isLoading.value = false;
+const resultMessage = computed(() => {
+  if (finalPercentage.value < 50) return 'Estude mais da próxima vez e acerte todas!';
+  if (finalPercentage.value < 80) return 'Mais um pouco de dedicação e você vai arrasar!';
+  return 'Você mandou muito bem! Continue assim e aumente o seu conhecimento!';
+});
+
+const showConfetti = ref(false);
+
+watch(finalPercentage, (val) => {
+  if (val >= 80) {
+    showConfetti.value = true;
   }
-};
+});
 
 const animateNumber = (targetRef, finalValue, formatFn = (v) => Math.round(v)) => {
   let currentValue = targetRef.value || 0;
@@ -55,36 +60,36 @@ const animateNumber = (targetRef, finalValue, formatFn = (v) => Math.round(v)) =
   }, 15);
 };
 
+const isLoading = ref(true);
+
+const withLoading = async (fn) => {
+  isLoading.value = true;
+  try {
+    await fn();
+  } catch (err) {
+    console.error('Erro na requisição: ', err);
+    handleToast('error', 'Ocorreu um erro ao carregar o resultado do quiz. Tente novamente mais tarde.');
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const calculatePercentage = (score, total) => total > 0 ? Math.round((score / total) * 100) : 0;
+
 onMounted(async () => {
   await withLoading(async () => {
     await quizStore.fetchQuizResult(route.params.id);
   });
   
-  if (quiz.value) {
-    const totalQuestions = quiz.value.answers.length || 0;
-    finalPercentage.value = Math.round((quiz.value.score / totalQuestions) * 100);
+  if (quizResult.value) {
+    finalPercentage.value = calculatePercentage(
+      quizResult.value.score, 
+      quizResult.value.answers.length
+    );
 
-    animateNumber(percentage, finalPercentage.value);
-    animateNumber(score, quiz.value.score);
-
-    setTimeout(() => {
-      if (finalPercentage.value >= 80) {
-        showConfetti.value = true;
-      }
-    }, 450);
+    animateNumber(rawPercentage, finalPercentage.value);
+    animateNumber(resultScore, quizResult.value.score);
   }
-});
-
-const resultTitle = computed(() => {
-  if (finalPercentage.value < 50) return 'Não desista!';
-  if (finalPercentage.value < 80) return 'Você está quase lá!';
-  return 'Excelente!';
-});
-
-const resultMessage = computed(() => {
-  if (finalPercentage.value < 50) return 'Estude mais da próxima vez e acerte todas!';
-  if (finalPercentage.value < 80) return 'Mais um pouco de dedicação e você vai arrasar!';
-  return 'Você mandou muito bem! Continue assim e aumente o seu conhecimento!';
 });
 </script>
 
@@ -101,7 +106,7 @@ const resultMessage = computed(() => {
       class="absolute top-0 left-0 w-full h-full z-10"
     />
 
-    <div v-if="quiz" class="flex flex-col items-center justify-center mt-20 gap-6 text-center px-4">
+    <div v-if="quizResult" class="flex flex-col items-center justify-center mt-20 gap-6 text-center px-4">
       <div class="relative w-32 h-32">
         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
           <circle
@@ -121,21 +126,21 @@ const resultMessage = computed(() => {
             fill="none"
             stroke-linecap="round"
             :stroke-dasharray="282.74"
-            :stroke-dashoffset="282.74 - (282.74 * percentage / 100)"
+            :stroke-dashoffset="282.74 - (282.74 * rawPercentage / 100)"
           />
         </svg>
         <div class="absolute inset-0 flex flex-col items-center justify-center">
           <div class="text-xl font-bold">
-            {{ percentage }}%
+            {{ rawPercentage }}%
           </div>
           <div class="text-sm text-gray-500">
-            {{ quiz.score }} de {{ quiz.answers.length }}
+            {{ quizResult.score }} de {{ quizResult.answers.length }}
           </div>
         </div>
       </div>
       
       <div class="bg-white text-success px-4 py-2 rounded-full shadow-lg border border-gray-100 text-sm font-bold">
-        +{{ score }} XP
+        +{{ resultScore }} XP
       </div>
       
       <div class="message">
