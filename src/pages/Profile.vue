@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user';
+import { useQuizStore } from '@/stores/quiz';
 import { useAuth } from '@/use/useAuth';
 import { useToast } from '@/use/useToast';
 import { ExclamationTriangleIcon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline';
@@ -55,14 +56,26 @@ const signOut = async () => {
   }
 };
 
+const totalQuizzes = ref(0);
+const totalPoints = ref(0);
+const userRanking = ref(0);
+
+const processUserStats = (results) => {
+  totalQuizzes.value = results.length;
+  totalPoints.value = results.reduce((sum, r) => sum + (r.score || 0), 0);
+};
+
 const userStore = useUserStore();
 
-const { user } = storeToRefs(useUserStore()); 
+const { user } = storeToRefs(userStore); 
+
+const quizStore = useQuizStore();
 
 const loadData = async () => {
   await withLoading(async () => {
     await userStore.fetchUser();
-    console.log(user.value);
+    const userResults = await quizStore.getUserResults();
+    processUserStats(userResults);
   });
 };
 
@@ -95,9 +108,9 @@ onMounted(loadData);
           <span class="text-sm text-secondary">{{ user?.email }}</span>
         </div>
         <UserStats
-          :quizzes="2"
-          :points="18"
-          :ranking="1"
+          :quizzes="totalQuizzes"
+          :points="totalPoints"
+          :ranking="userRanking"
         />
       </div>
     </div>
