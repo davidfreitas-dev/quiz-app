@@ -1,6 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { useUserStore } from '@/stores/user';
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -80,12 +79,8 @@ const getCurrentUser = () => {
 };
 
 router.beforeEach(async (to, from, next) => {
-  const userStore = useUserStore();
-
   if (to.matched.some((record) => record.meta.requiresAuth)) {
-    const user = await getCurrentUser();
-    if (user) {
-      await userStore.fetchUserData(user.uid);
+    if (await getCurrentUser()) {
       next();
     } else {
       next('/signin');

@@ -1,5 +1,4 @@
 <script setup>
-import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { CheckCircleIcon, ChevronRightIcon, XCircleIcon } from '@heroicons/vue/24/solid';
 
@@ -12,18 +11,8 @@ const props = defineProps({
 
 const router = useRouter();
 
-const isExpired = computed(() => {
-  if (!props.quiz.deadline) return false;
-  const deadline = new Date(props.quiz.deadline.seconds * 1000);
-  return new Date() > deadline;
-});
-
-const isCompleted = computed(() => {
-  return props.quiz.score !== null && typeof props.quiz.score !== 'undefined';
-});
-
 const goToQuiz = () => {
-  if (!isExpired.value || isCompleted.value) {
+  if (props.quiz.available || props.quiz.done) {
     router.push(`/quiz/${props.quiz.id}`);
   }
 };
@@ -34,8 +23,8 @@ const goToQuiz = () => {
     @click="goToQuiz"
     class="quiz flex items-center justify-between gap-4 p-5 w-full rounded-lg bg-white shadow-lg border-l-4 transition cursor-pointer"
     :class="[
-      isCompleted ? 'border-success' : isExpired ? 'border-red-400' : 'border-primary',
-      isExpired && !isCompleted ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-md'
+      quiz.done ? 'border-success' : !quiz.available ? 'border-red-400' : 'border-primary',
+      !quiz.available && !quiz.done ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-md'
     ]"
   >
     <div class="flex flex-col flex-1 pl-2">
@@ -48,11 +37,11 @@ const goToQuiz = () => {
     </div>
 
     <CheckCircleIcon
-      v-if="isCompleted"
+      v-if="quiz.done"
       class="w-6 h-6 text-success"
     />
     <XCircleIcon
-      v-else-if="isExpired"
+      v-else-if="!quiz.available"
       class="w-6 h-6 text-red-400"
     />
     <ChevronRightIcon

@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import { getAuth } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
 
 export const useUserStore = defineStore('user', () => {
+  const auth = getAuth();
   const user = ref(null);
   const isLoading = ref(false);  
 
@@ -19,15 +21,15 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
-  const fetchUserData = async (uid) => {
-    await withLoading(async () => {
-      const userDoc = await getDoc(doc(db, 'users', uid));
-      if (userDoc.exists()) {
-        setUser(userDoc.data());
-      } else {
-        throw new Error('Usuário não encontrado.');
-      }
-    });
+  const fetchUser = async () => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) throw new Error('Usuário não autenticado');
+  
+    const userRef = doc(db, 'users', uid);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) throw new Error('Usuário não encontrado no banco');
+    
+    setUser({ id: uid, ...userSnap.data() });
   };
 
   const saveUser = async (userData) => {
@@ -56,7 +58,6 @@ export const useUserStore = defineStore('user', () => {
 
   const setUser = (userData) => {
     user.value = userData;
-    console.log('USER: ', user.value);
   };
 
   const clearUser = () => {
@@ -66,7 +67,7 @@ export const useUserStore = defineStore('user', () => {
   return {
     user,
     isLoading,
-    fetchUserData,
+    fetchUser,
     saveUser,
     updateUser,
     deleteUser,

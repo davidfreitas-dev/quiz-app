@@ -1,11 +1,9 @@
 <script setup>
-// External libs
-import { onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { useQuizStore } from '@/stores/quiz';
-
-// Internal composables
+import { useUserStore } from '@/stores/user';
 import { useToast } from '@/use/useToast';
 
 // UI Components
@@ -14,23 +12,81 @@ import Header from '@/components/Header.vue';
 import ProgressCircle from '@/components/ProgressCircle.vue';
 import Text from '@/components/Text.vue';
 import QuizCard from '@/components/QuizCard.vue';
-import PageLoader from '@/components/PageLoader.vue';
 import Button from '@/components/Button.vue';
+import PageLoader from '@/components/PageLoader.vue';
 import Toast from '@/components/Toast.vue';
 
 // Router & stores
 const router = useRouter();
+const userStore = useUserStore();
 const quizStore = useQuizStore();
-const { toast, toastData, handleToast } = useToast();
-const { user, quizzes, isLoading, scoreSummary } = storeToRefs(quizStore);
 
-onMounted(async () => {
+const { toast, toastData, handleToast } = useToast();
+
+const isLoading = ref(true);
+
+const withLoading = async (fn) => {
+  isLoading.value = true;
   try {
-    await quizStore.fetchAllQuizzesWithScores();
-  } catch (error) {
+    await fn();
+  } catch (err) {
+    console.error('Erro na requisição: ', err);
     handleToast('error', 'Ocorreu um erro ao carregar os quizzes. Tente novamente mais tarde.');
+  } finally {
+    isLoading.value = false;
   }
-});
+};
+
+const parseFirestoreDate = (date) => date?.toDate ? date.toDate() : new Date(date);
+
+const enrichQuizWithStatus = (quiz, result) => {
+  const now = new Date();
+  const deadlineDate = parseFirestoreDate(quiz.deadline);
+
+  return {
+    ...quiz,
+    done: !!result,
+    score: result?.score || null,
+    available: now <= deadlineDate,
+  };
+};
+
+const quizzes = ref([]);
+
+const loadQuizzesWithStatus = async () => {
+  const fetchedQuizzes = await quizStore.fetchQuizzes();
+  const userResults = await quizStore.getUserResults();
+  const resultMap = Object.fromEntries(userResults.map(r => [r.idquiz, r]));
+  quizzes.value = fetchedQuizzes.map(quiz => enrichQuizWithStatus(quiz, resultMap[quiz.id]));
+};
+
+const scoreSummary = computed(() => {
+  const completedQuizzes = quizzes.value.filter(q => q.done);
+  const totalScore = completedQuizzes.reduce((acc, quiz) => acc + quiz.score, 0);  
+  const totalQuestions = completedQuizzes.reduce((acc, quiz) => acc + quiz.totalQuestions, 0);
+  const averageScore = completedQuizzes.length > 0 ? Math.round(totalScore / completedQuizzes.length) : 0;
+  const percentage = totalQuestions > 0 
+    ? Math.round((totalScore / totalQuestions) * 100) 
+    : 0;
+  
+  return {
+    average: averageScore,
+    percentage,
+    totalScore
+  };
+});     
+
+const { user } = storeToRefs(userStore);
+
+const setupHome = async () => {
+  await withLoading(async () => {
+    await userStore.fetchUser();
+    await loadQuizzesWithStatus();
+    console.log('QUIZZES: ', quizzes.value);
+  });
+};
+
+onMounted(setupHome);
 </script>
 
 <template>
