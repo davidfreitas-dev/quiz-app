@@ -2,9 +2,14 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuizStore } from '@/stores/quiz';
+import { useToast } from '@/use/useToast';
+
+// UI Components
 import ConfettiExplosion from 'vue-confetti-explosion';
 import Container from '@/components/Container.vue';
 import Button from '@/components/Button.vue';
+import PageLoader from '@/components/PageLoader.vue';
+import Toast from '@/components/Toast.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -16,6 +21,22 @@ const score = ref(0);
 const percentage = ref(0);
 const finalPercentage = ref(0);
 const showConfetti = ref(false);
+
+const { toast, toastData, handleToast } = useToast();
+
+const isLoading = ref(true);
+
+const withLoading = async (fn) => {
+  isLoading.value = true;
+  try {
+    await fn();
+  } catch (err) {
+    console.error('Erro na requisição: ', err);
+    handleToast('error', 'Ocorreu um erro ao carregar o resultado do quiz. Tente novamente mais tarde.');
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 const animateNumber = (targetRef, finalValue, formatFn = (v) => Math.round(v)) => {
   let currentValue = targetRef.value || 0;
@@ -35,8 +56,10 @@ const animateNumber = (targetRef, finalValue, formatFn = (v) => Math.round(v)) =
 };
 
 onMounted(async () => {
-  await quizStore.fetchQuizResult(route.params.id);
-
+  await withLoading(async () => {
+    await quizStore.fetchQuizResult(route.params.id);
+  });
+  
   if (quiz.value) {
     const totalQuestions = quiz.value.answers.length || 0;
     finalPercentage.value = Math.round((quiz.value.score / totalQuestions) * 100);
@@ -66,7 +89,9 @@ const resultMessage = computed(() => {
 </script>
 
 <template>
-  <Container>
+  <PageLoader :visible="isLoading" />
+  
+  <Container v-if="!isLoading">
     <ConfettiExplosion
       v-if="showConfetti"
       :stage-width="1200"
@@ -126,5 +151,7 @@ const resultMessage = computed(() => {
         Voltar ao início
       </Button>
     </div>
+
+    <Toast ref="toast" :toast-data="toastData" />
   </Container>
 </template>

@@ -16,10 +16,7 @@ import Button from '@/components/Button.vue';
 import PageLoader from '@/components/PageLoader.vue';
 import Toast from '@/components/Toast.vue';
 
-// Router & stores
 const router = useRouter();
-const userStore = useUserStore();
-const quizStore = useQuizStore();
 
 const { toast, toastData, handleToast } = useToast();
 
@@ -51,6 +48,8 @@ const enrichQuizWithStatus = (quiz, result) => {
   };
 };
 
+const quizStore = useQuizStore();
+
 const quizzes = ref([]);
 
 const loadQuizzesWithStatus = async () => {
@@ -71,18 +70,19 @@ const scoreSummary = computed(() => {
   
   return {
     average: averageScore,
+    completedQuizzes: completedQuizzes.length,
     percentage,
     totalScore
   };
-});     
+});  
+
+const userStore = useUserStore();   
 
 const { user } = storeToRefs(userStore);
 
 const setupHome = async () => {
   await withLoading(async () => {
-    await userStore.fetchUser();
     await loadQuizzesWithStatus();
-    console.log('QUIZZES: ', quizzes.value);
   });
 };
 
@@ -97,24 +97,24 @@ onMounted(setupHome);
           <h3 class="text-lg font-bold">
             Média geral
           </h3>
-          <span class="text-sm text-secondary">1 prova concluída</span>
+          <span class="text-sm text-secondary">{{ scoreSummary.completedQuizzes }} prova concluída</span>
         </div>
         <ProgressCircle :percentage="scoreSummary.percentage" :value="scoreSummary.average" />
       </div>
     </template>
   </Header>
 
-  <Container>
-    <PageLoader :visible="isLoading" />
+  <PageLoader :visible="isLoading" />
 
+  <Container v-if="!isLoading">
     <Text
-      v-if="!isLoading && !quizzes.length"
+      v-if="!quizzes.length"
       class="mx-auto my-7"
       text="Nenhum quizz disponível ainda :("
       size="md"
     />
 
-    <div v-if="!isLoading && quizzes.length" class="quizzes flex flex-1 flex-col items-start w-full gap-3 my-7">
+    <div v-else class="quizzes flex flex-1 flex-col items-start w-full gap-3 my-7">
       <Text
         class="leading-6 text-gray-900 mb-3"
         size="md"
@@ -130,13 +130,13 @@ onMounted(setupHome);
     </div>
 
     <Button
-      v-if="!isLoading"
       size="block"
       @click="router.push('/ranking')"
     >
       Ranking
     </Button>
-    
+
     <Toast ref="toast" :toast-data="toastData" />
   </Container>
 </template>
+

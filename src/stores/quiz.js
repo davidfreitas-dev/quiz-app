@@ -12,7 +12,9 @@ export const useQuizStore = defineStore('quiz', () => {
   const isQuizDone = ref(false);
   const isLoading = ref(true);
 
-  const { user } = storeToRefs(useUserStore());
+  const userStore = useUserStore();
+
+  const { user } = storeToRefs(userStore);
 
   const withLoading = async (fn) => {
     isLoading.value = true;
@@ -35,6 +37,8 @@ export const useQuizStore = defineStore('quiz', () => {
   };
   
   const getUserResults = async () => {
+    await userStore.fetchUser();
+
     const userId = user.value.id;
     const resultsRef = collection(db, 'users', userId, 'results');
     const snapshot = await getDocs(resultsRef);
@@ -133,6 +137,8 @@ export const useQuizStore = defineStore('quiz', () => {
 
   const fetchQuizResult = async (quizId) => {
     await withLoading(async () => {
+      await userStore.fetchUser();
+
       const resultsQuery = query(
         collection(db, `users/${user.value.id}/results`),
         where('idquiz', '==', Number(quizId))
@@ -172,6 +178,8 @@ export const useQuizStore = defineStore('quiz', () => {
 
   const submitQuizResult = async ({ quizId, answers, score }) => {
     await withLoading(async () => {
+      await userStore.fetchUser();
+      
       const userRef = doc(db, 'users', user.value.id);
       const resultRef = doc(collection(userRef, 'results'));
 
