@@ -7,7 +7,6 @@ import QuizHeader from '@/components/QuizHeader.vue';
 import QuestionOption from '@/components/QuestionOption.vue';
 import NavActions from '@/components/NavActions.vue';
 import PageLoader from '@/components/PageLoader.vue';
-import Toast from '@/components/Toast.vue';
 
 const {
   quiz,
@@ -17,8 +16,6 @@ const {
   currentQuestion,
   isLastQuestion,
   progress,
-  toast,
-  toastData,
   fetchQuiz,
   selectOptionByValue,
   getCurrentSelectedOption,
@@ -79,8 +76,6 @@ onMounted(async () => {
         @on-handle-left="goToPreviousQuestion"
         @on-handle-right="goToNextQuestion"
       />
-
-      <Toast ref="toast" :toast-data="toastData" />
     </div>
   </Container>
 </template>

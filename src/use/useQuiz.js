@@ -2,6 +2,7 @@ import { ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuizStore } from '@/stores/quiz';
+import { useLoading } from '@/use/useLoading';
 import { useToast } from '@/use/useToast';
 
 export function useQuiz() {
@@ -9,8 +10,9 @@ export function useQuiz() {
   const router = useRouter();
   const quizStore = useQuizStore();
   
-  const { toast, toastData, handleToast } = useToast();
-  const { quiz, isLoading, isQuizDone, quizResult } = storeToRefs(quizStore);
+  const { showToast } = useToast();
+  const { isLoading, withLoading } = useLoading();
+  const { quiz, quizResult, isQuizDone } = storeToRefs(quizStore);
   const { fetchQuizById, fetchQuizResult, submitQuizResult } = quizStore;
   
   const userAnswers = ref([]);
@@ -39,32 +41,24 @@ export function useQuiz() {
     }
   };
   
-  const markQuizAsCompleted = async (quizId) => {
-    try {
-      await fetchQuizResult(quizId);
+  const markQuizAsCompleted = () => {
+    isQuizDone.value = quizResult.value?.answers?.length > 0;
+    if (!isQuizDone.value) return;  
+    markSelectedOptions(quiz.value?.questions, quizResult.value.answers);
+  };
   
-      if (quizResult.value?.answers?.length) {
-        isQuizDone.value = true;
-        markSelectedOptions(quiz.value.questions, quizResult.value.answers);
-      } else {
-        isQuizDone.value = false;
-      }
-    } catch (error) {
-      handleToast('error', 'Erro ao carregar o resultado do quiz. Tente novamente mais tarde.');
-      console.error(error);
-    }
-  };  
-
   const fetchQuiz = async () => {
     const quizId = Number(route.params.id);
-    try {
-      await fetchQuizById(quizId);
-      await markQuizAsCompleted(quizId);
-    } catch (error) {
-      handleToast('error', 'Erro ao carregar o quiz. Tente novamente mais tarde.');
-      console.error(error);
-    }
-  };
+  
+    await withLoading(
+      async () => {
+        await fetchQuizById(quizId);
+        await fetchQuizResult(quizId);
+        markQuizAsCompleted();
+      },
+      'Erro ao carregar o quiz. Tente novamente mais tarde.'
+    );
+  };  
 
   const selectOptionByValue = (value) => {
     if (isQuizDone.value) return;
@@ -82,7 +76,7 @@ export function useQuiz() {
     const hasSelectedOption = currentQuestion.value?.options?.some((option) => option.selected);
     
     if (!hasSelectedOption) {
-      handleToast('error', 'Selecione uma opção antes de continuar');
+      showToast('error', 'Selecione uma opção antes de continuar');
       return false;
     }
 
@@ -142,7 +136,7 @@ export function useQuiz() {
   
       router.push(`/result/${quiz.value.id}`);
     } catch (error) {
-      handleToast('error', 'Erro ao finalizar o quiz. Tente novamente mais tarde.');
+      showToast('error', 'Erro ao finalizar o quiz. Tente novamente mais tarde.');
       console.error(error);
     }
   };  
@@ -183,14 +177,12 @@ export function useQuiz() {
 
   return {
     quiz,
-    isQuizDone,
-    isLoading,
     currentQuestionIndex,
     currentQuestion,
     isLastQuestion,
+    isQuizDone,
+    isLoading,
     progress,
-    toastData,
-    toast,
     fetchQuiz,
     selectOptionByValue,
     computeOptionClass,

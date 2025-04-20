@@ -7,7 +7,7 @@ export function useAuth() {
   const isLoading = ref(false);
 
   const { handleException, exception } = useException();
-  const { toast, toastData, handleToast } = useToast();
+  const { toast, toastData, showToast } = useToast();
 
   const withLoading = async (fn) => {
     isLoading.value = true;    
@@ -15,7 +15,7 @@ export function useAuth() {
       return await fn();
     } catch (err) {
       handleException(err.code);
-      handleToast('error', exception.value);
+      showToast('error', exception.value);
     } finally {
       isLoading.value = false;
     }

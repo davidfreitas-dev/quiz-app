@@ -3,14 +3,13 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useQuizStore } from '@/stores/quiz';
-import { useToast } from '@/use/useToast';
+import { useLoading } from '@/use/useLoading';
 
 // UI Components
 import ConfettiExplosion from 'vue-confetti-explosion';
 import Container from '@/components/Container.vue';
 import Button from '@/components/Button.vue';
 import PageLoader from '@/components/PageLoader.vue';
-import Toast from '@/components/Toast.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -20,8 +19,6 @@ const { quizResult } = storeToRefs(quizStore);
 const resultScore = ref(0);
 const rawPercentage = ref(0);
 const finalPercentage = ref(0);
-
-const { toast, toastData, handleToast } = useToast();
 
 const resultTitle = computed(() => {
   if (finalPercentage.value < 50) return 'Não desista!';
@@ -60,19 +57,7 @@ const animateNumber = (targetRef, finalValue, formatFn = (v) => Math.round(v)) =
   }, 15);
 };
 
-const isLoading = ref(true);
-
-const withLoading = async (fn) => {
-  isLoading.value = true;
-  try {
-    await fn();
-  } catch (err) {
-    console.error('Erro na requisição: ', err);
-    handleToast('error', 'Ocorreu um erro ao carregar o resultado do quiz. Tente novamente mais tarde.');
-  } finally {
-    isLoading.value = false;
-  }
-};
+const { isLoading, withLoading } = useLoading();
 
 const calculatePercentage = (score, total) => total > 0 ? Math.round((score / total) * 100) : 0;
 
@@ -156,7 +141,5 @@ onMounted(async () => {
         Voltar ao início
       </Button>
     </div>
-
-    <Toast ref="toast" :toast-data="toastData" />
   </Container>
 </template>

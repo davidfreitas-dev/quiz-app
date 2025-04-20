@@ -104,70 +104,66 @@ export const useQuizStore = defineStore('quiz', () => {
   };  
 
   const fetchQuizById = async (quizId) => {
-    await withLoading(async () => {
-      const quizzesSnapshot = await getDocs(
-        query(collection(db, 'quizzes'), where('id', '==', quizId))
-      );
-  
-      if (quizzesSnapshot.empty) {
-        throw new Error('Quiz não encontrado');
-      }
-  
-      const quizDoc = quizzesSnapshot.docs[0];
-      const quizDocRef = doc(db, 'quizzes', quizDoc.id);
-      const questionsSnapshot = await getDocs(query(collection(quizDocRef, 'questions')));
-  
-      if (questionsSnapshot.empty) {
-        throw new Error('Nenhuma pergunta encontrada para este quiz');
-      }
-  
-      const questions = questionsSnapshot.docs
-        .sort((a, b) => Number(a.id) - Number(b.id)) // ordena pelo ID do documento
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-  
-      quiz.value = {
-        ...quizDoc.data(),
-        questions
-      };
-    });
+    const quizzesSnapshot = await getDocs(
+      query(collection(db, 'quizzes'), where('id', '==', quizId))
+    );
+
+    if (quizzesSnapshot.empty) {
+      throw new Error('Quiz não encontrado');
+    }
+
+    const quizDoc = quizzesSnapshot.docs[0];
+    const quizDocRef = doc(db, 'quizzes', quizDoc.id);
+    const questionsSnapshot = await getDocs(query(collection(quizDocRef, 'questions')));
+
+    if (questionsSnapshot.empty) {
+      throw new Error('Nenhuma pergunta encontrada para este quiz');
+    }
+
+    const questions = questionsSnapshot.docs
+      .sort((a, b) => Number(a.id) - Number(b.id)) // ordena pelo ID do documento
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+    quiz.value = {
+      ...quizDoc.data(),
+      questions
+    };
   };    
 
   const fetchQuizResult = async (quizId) => {
-    await withLoading(async () => {
-      await userStore.fetchUser();
+    await userStore.fetchUser();
 
-      const resultsQuery = query(
-        collection(db, `users/${user.value.id}/results`),
-        where('idquiz', '==', Number(quizId))
-      );
+    const resultsQuery = query(
+      collection(db, `users/${user.value.id}/results`),
+      where('idquiz', '==', Number(quizId))
+    );
   
-      const resultsSnapshot = await getDocs(resultsQuery);
+    const resultsSnapshot = await getDocs(resultsQuery);
 
-      if (resultsSnapshot.empty) {
-        console.warn('Nenhum resultado encontrado.');
-        quizResult.value = null;
-        return;
-      }
+    if (resultsSnapshot.empty) {
+      console.warn('Nenhum resultado encontrado.');
+      quizResult.value = null;
+      return;
+    }
   
-      const resultDoc = resultsSnapshot.docs[0];
-      const resultData = resultDoc.data();
-      const resultId = resultDoc.id;
+    const resultDoc = resultsSnapshot.docs[0];
+    const resultData = resultDoc.data();
+    const resultId = resultDoc.id;
   
-      const answersSnapshot = await getDocs(collection(resultDoc.ref, 'answers'));
+    const answersSnapshot = await getDocs(collection(resultDoc.ref, 'answers'));
   
-      const answers = answersSnapshot.docs
-        .sort((a, b) => Number(a.data().question_id) - Number(b.data().question_id))
-        .map(doc => doc.data());
+    const answers = answersSnapshot.docs
+      .sort((a, b) => Number(a.data().question_id) - Number(b.data().question_id))
+      .map(doc => doc.data());
   
-      quizResult.value = {
-        id: resultId,
-        ...resultData,
-        answers
-      };
-    });
+    quizResult.value = {
+      id: resultId,
+      ...resultData,
+      answers
+    };
   };  
 
   const saveQuiz = async (quizData) => {

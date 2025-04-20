@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { useQuizStore } from '@/stores/quiz';
 import { useUserStore } from '@/stores/user';
+import { useLoading } from '@/use/useLoading';
 import { useToast } from '@/use/useToast';
 
 // UI Components
@@ -14,25 +15,8 @@ import Text from '@/components/Text.vue';
 import QuizCard from '@/components/QuizCard.vue';
 import Button from '@/components/Button.vue';
 import PageLoader from '@/components/PageLoader.vue';
-import Toast from '@/components/Toast.vue';
 
 const router = useRouter();
-
-const { toast, toastData, handleToast } = useToast();
-
-const isLoading = ref(true);
-
-const withLoading = async (fn) => {
-  isLoading.value = true;
-  try {
-    await fn();
-  } catch (err) {
-    console.error('Erro na requisição: ', err);
-    handleToast('error', 'Ocorreu um erro ao carregar os quizzes. Tente novamente mais tarde.');
-  } finally {
-    isLoading.value = false;
-  }
-};
 
 const parseFirestoreDate = (date) => date?.toDate ? date.toDate() : new Date(date);
 
@@ -76,9 +60,9 @@ const scoreSummary = computed(() => {
   };
 });  
 
-const userStore = useUserStore();   
-
-const { user } = storeToRefs(userStore);
+const userStore = useUserStore();
+const { user } = storeToRefs(userStore); 
+const { isLoading, withLoading } = useLoading();
 
 const setupHome = async () => {
   await withLoading(async () => {
@@ -135,8 +119,6 @@ onMounted(setupHome);
     >
       Ranking
     </Button>
-
-    <Toast ref="toast" :toast-data="toastData" />
   </Container>
 </template>
 

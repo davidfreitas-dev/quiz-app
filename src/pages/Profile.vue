@@ -47,13 +47,14 @@ const userStore = useUserStore();
 const quizStore = useQuizStore();
 
 const { user } = storeToRefs(userStore); 
-const { isLoading, withLoading, toast, toastData, } = useLoading();
+const { isLoading, withLoading } = useLoading();
 
 const loadData = async () => {
+  const defaultErrMsg = 'Não foi possível carregar os dados de perfil do usuário. Tente novamente mais tarde.';
   await withLoading(async () => {
     const userResults = await quizStore.getUserResults();
     processUserStats(userResults);
-  });
+  }, defaultErrMsg);
 };
 
 onMounted(loadData);
@@ -106,6 +107,4 @@ onMounted(loadData);
     </template>  
     Deseja realmente sair e finalizar a sessão?
   </Modal>
-
-  <Toast ref="toast" :toast-data="toastData" />
 </template>
