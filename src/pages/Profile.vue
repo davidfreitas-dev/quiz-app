@@ -2,48 +2,26 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
+import { useAuth } from '@/use/useAuth';
 import { useUserStore } from '@/stores/user';
 import { useQuizStore } from '@/stores/quiz';
-import { useAuth } from '@/use/useAuth';
-import { useToast } from '@/use/useToast';
+import { useLoading } from '@/use/useLoading';
 import { ExclamationTriangleIcon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline';
 
-// UI Components
+// UI components
 import PageLoader from '@/components/PageLoader.vue';
 import Container from '@/components/Container.vue';
-import Avatar from '@/components/Avatar.vue';
 import BackButton from '@/components/BackButton.vue';
 import Heading from '@/components/Heading.vue';
+import Avatar from '@/components/Avatar.vue';
 import UserStats from '@/components/UserStats.vue';
 import Button from '@/components/Button.vue';
 import Modal from '@/components/Modal.vue';
 import Toast from '@/components/Toast.vue';
 
-const { toast, toastData, handleToast } = useToast();
-
-const isLoading = ref(true);
-
-const withLoading = async (fn) => {
-  isLoading.value = true;
-  try {
-    await fn();
-  } catch (err) {
-    console.error('Erro na requisição: ', err);
-    handleToast('error', 'Ocorreu um erro ao carregar os dados. Tente novamente mais tarde.');
-  } finally {
-    isLoading.value = false;
-  }
-};
-
 const modalRef = ref(null);
-
-const showModal = () => {
-  modalRef.value?.setOpen();
-};
-
-const closeModal = () => {
-  modalRef.value?.closeModal();
-};
+const showModal = () => modalRef.value?.setOpen();
+const closeModal = () => modalRef.value?.closeModal();
 
 const router = useRouter();
 
@@ -66,14 +44,13 @@ const processUserStats = (results) => {
 };
 
 const userStore = useUserStore();
+const quizStore = useQuizStore();
 
 const { user } = storeToRefs(userStore); 
-
-const quizStore = useQuizStore();
+const { isLoading, withLoading, toast, toastData, } = useLoading();
 
 const loadData = async () => {
   await withLoading(async () => {
-    await userStore.fetchUser();
     const userResults = await quizStore.getUserResults();
     processUserStats(userResults);
   });
