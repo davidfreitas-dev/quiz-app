@@ -12,8 +12,8 @@ export function useQuiz() {
   
   const { showToast } = useToast();
   const { isLoading, withLoading } = useLoading();
-  const { quiz, quizResult, isQuizDone } = storeToRefs(quizStore);
-  const { fetchQuizById, fetchQuizResult, submitQuizResult } = quizStore;
+  const { fetchQuizById, submitQuizResult } = quizStore;
+  const { quiz } = storeToRefs(quizStore);
   
   const userAnswers = ref([]);
   const currentQuestionIndex = ref(0);
@@ -41,27 +41,22 @@ export function useQuiz() {
     }
   };
   
-  const markQuizAsCompleted = () => {
-    isQuizDone.value = quizResult.value?.answers?.length > 0;
-    if (!isQuizDone.value) return;  
-    markSelectedOptions(quiz.value?.questions, quizResult.value.answers);
-  };
-  
   const fetchQuiz = async () => {
     const quizId = Number(route.params.id);
   
     await withLoading(
       async () => {
         await fetchQuizById(quizId);
-        await fetchQuizResult(quizId);
-        markQuizAsCompleted();
+        if (quiz.value?.done) {
+          markSelectedOptions(quiz.value.questions, quiz.value.answers);
+        }
       },
       'Erro ao carregar o quiz. Tente novamente mais tarde.'
     );
   };  
 
   const selectOptionByValue = (value) => {
-    if (isQuizDone.value) return;
+    if (quiz.value?.done) return;
     currentQuestion.value.options.forEach((option) => {
       option.selected = option.option === value;
     });
@@ -109,14 +104,14 @@ export function useQuiz() {
   };
 
   const goToNextQuestion = async () => {
-    if (!isQuizDone.value && !validateCurrentAnswer()) return;
+    if (!quiz.value?.done && !validateCurrentAnswer()) return;
 
     if (!isLastQuestion.value) {
       currentQuestionIndex.value++;
       return;
     }
 
-    if (isQuizDone.value) {
+    if (quiz.value?.done) {
       router.push('/');
     } else {
       await finishQuiz();
@@ -146,16 +141,16 @@ export function useQuiz() {
       'flex justify-between items-center gap-2 px-3 w-full h-14 rounded-2xl shadow-sm transition-colors text-dark bg-light';
   
     const isCorrectAnswer =
-      isQuizDone.value &&
+      quiz.value?.done &&
       isCurrentQuestionReady.value &&
       option?.option === currentQuestion.value.answer;
   
     const isWrongSelected =
-      isQuizDone.value &&
+      quiz.value?.done &&
       checked &&
       !isCorrectAnswer;
   
-    const selectedClass = !isQuizDone.value
+    const selectedClass = !quiz.value?.done
       ? checked
         ? 'bg-primary-light text-primary'
         : ''
@@ -180,7 +175,6 @@ export function useQuiz() {
     currentQuestionIndex,
     currentQuestion,
     isLastQuestion,
-    isQuizDone,
     isLoading,
     progress,
     fetchQuiz,

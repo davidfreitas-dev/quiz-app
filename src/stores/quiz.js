@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { defineStore, storeToRefs } from 'pinia';
 import { collection, doc, addDoc, setDoc, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/services/firebase-firestore';
@@ -7,7 +7,6 @@ import { useUserStore } from '@/stores/user';
 export const useQuizStore = defineStore('quiz', () => {
   const quiz = ref(null);
   const quizzes = ref([]);
-  const quizResult = ref(null);
   const usersResults = ref([]);
   const isQuizDone = ref(false);
   const isLoading = ref(true);
@@ -121,16 +120,22 @@ export const useQuizStore = defineStore('quiz', () => {
     }
 
     const questions = questionsSnapshot.docs
-      .sort((a, b) => Number(a.id) - Number(b.id)) // ordena pelo ID do documento
+      .sort((a, b) => Number(a.id) - Number(b.id))
       .map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
 
+    const quizResult = await fetchQuizResult(quizId);
+
     quiz.value = {
       ...quizDoc.data(),
-      questions
+      ...quizResult,
+      questions,
+      done: !!quizResult
     };
+
+    console.log('Quiz Data: ', quiz.value);
   };    
 
   const fetchQuizResult = async (quizId) => {
@@ -143,15 +148,9 @@ export const useQuizStore = defineStore('quiz', () => {
   
     const resultsSnapshot = await getDocs(resultsQuery);
 
-    if (resultsSnapshot.empty) {
-      console.warn('Nenhum resultado encontrado.');
-      quizResult.value = null;
-      return;
-    }
+    if (resultsSnapshot.empty) return null;
   
     const resultDoc = resultsSnapshot.docs[0];
-    const resultData = resultDoc.data();
-    const resultId = resultDoc.id;
   
     const answersSnapshot = await getDocs(collection(resultDoc.ref, 'answers'));
   
@@ -159,9 +158,9 @@ export const useQuizStore = defineStore('quiz', () => {
       .sort((a, b) => Number(a.data().question_id) - Number(b.data().question_id))
       .map(doc => doc.data());
   
-    quizResult.value = {
-      id: resultId,
-      ...resultData,
+    return {
+      idresult: resultDoc.id,
+      score: resultDoc.data().score,
       answers
     };
   };  
@@ -198,7 +197,6 @@ export const useQuizStore = defineStore('quiz', () => {
     user,
     quiz,
     quizzes,
-    quizResult,
     usersResults,
     isLoading,
     isQuizDone,
@@ -206,7 +204,6 @@ export const useQuizStore = defineStore('quiz', () => {
     fetchUsersAndResults,
     fetchQuizzes,
     fetchQuizById,
-    fetchQuizResult,
     saveQuiz,
     submitQuizResult
   };
