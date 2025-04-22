@@ -98,7 +98,7 @@ onMounted(setupHome);
       size="md"
     />
 
-    <div v-else class="quizzes flex flex-1 flex-col items-start w-full gap-3 my-7">
+    <div v-else class="quizzes flex flex-1 flex-col items-start w-full gap-5 my-7">
       <Text
         class="leading-6 text-gray-900 mb-3"
         size="md"
