@@ -81,7 +81,10 @@ onMounted(setupHome);
           <h3 class="text-lg font-bold">
             Média geral
           </h3>
-          <span class="text-sm text-secondary">{{ scoreSummary.completedQuizzes }} prova concluída</span>
+          <span class="text-sm text-secondary">
+            {{ scoreSummary.completedQuizzes }} 
+            {{ scoreSummary.completedQuizzes === 1 ? 'prova concluída' : 'provas concluídas' }}
+          </span>
         </div>
         <ProgressCircle :percentage="scoreSummary.percentage" :value="scoreSummary.average" />
       </div>

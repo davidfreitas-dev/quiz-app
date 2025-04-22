@@ -21,7 +21,7 @@ const props = defineProps({
       <p class="text-sm mt-2 font-semibold text-center">
         {{ splitUserName(topThree[1].name) }}
       </p>
-      <div class="text-xs my-1 px-4 py-1.5 rounded-lg bg-white text-primary font-bold">
+      <div class="text-xs mt-1 mb-3 px-4 py-1.5 rounded-lg bg-[#aea7ed] text-white font-bold">
         {{ topThree[1].score }} XP
       </div>
       <div class="bg-[#aea7ed] text-white px-3 py-1 mt-2 font-medium w-full text-center h-[70px]">
@@ -37,7 +37,7 @@ const props = defineProps({
       <p class="text-sm mt-2 font-bold text-center">
         {{ splitUserName(topThree[0].name) }}
       </p>
-      <div class="text-xs my-1 px-4 py-1.5 rounded-lg bg-white text-primary font-bold">
+      <div class="text-xs mt-1 mb-3 px-4 py-1.5 rounded-lg bg-[#aea7ed] text-white font-bold">
         {{ topThree[0].score }} XP
       </div>
       <div class="bg-[#9a90e6] text-white px-3 py-1 mt-2 font-semibold w-full text-center h-[90px]">
@@ -53,7 +53,7 @@ const props = defineProps({
       <p class="text-sm mt-2 font-semibold text-center">
         {{ splitUserName(topThree[2].name) }}
       </p>
-      <div class="text-xs my-1 px-4 py-1.5 rounded-lg bg-white text-primary font-bold">
+      <div class="text-xs mt-1 mb-3 px-4 py-1.5 rounded-lg bg-[#aea7ed] text-white font-bold">
         {{ topThree[2].score }} XP
       </div>
       <div class="bg-[#aea7ed] text-white px-3 py-1 mt-2 font-medium w-full text-center h-[55px]">
