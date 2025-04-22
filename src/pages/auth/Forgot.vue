@@ -2,26 +2,30 @@
 import { ref, computed } from 'vue';
 import { useAuth } from '@/use/useAuth';
 import { useException } from '@/use/useException';
+import { useToast } from '@/use/useToast';
 
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
 import TextInput from '@/components/TextInput.vue';
 import Button from '@/components/Button.vue';
-import Toast from '@/components/Toast.vue';
 import Loader from '@/components/Loader.vue';
 
-const { isLoading, toast, toastData, passwordReset } = useAuth();
+const { isLoading, passwordReset } = useAuth();
 
 const email = ref('');
 
 const invalidForm = computed(() => !email.value);
+
+const { showToast } = useToast();
 
 const requestPasswordReset = async (event) => {
   event.preventDefault();
 
   if (invalidForm.value) return;
   
-  await passwordReset(email.value);
+  const response = await passwordReset(email.value);
+
+  showToast(response.status, response.message);
 };
 </script>
 
@@ -71,7 +75,5 @@ const requestPasswordReset = async (event) => {
         />
       </router-link>
     </footer>
-
-    <Toast ref="toast" :toast-data="toastData" />
   </div>
 </template>

@@ -8,12 +8,11 @@ import Text from '@/components/Text.vue';
 import TextInput from '@/components/TextInput.vue';
 import Button from '@/components/Button.vue';
 import GoogleButton from '@/components/GoogleButton.vue';
-import Toast from '@/components/Toast.vue';
 import Loader from '@/components/Loader.vue';
 
 const router = useRouter();
 
-const { isLoading, toast, toastData, signIn } = useAuth();
+const { isLoading, signIn } = useAuth();
 
 const formData = reactive({
   email: '',
@@ -102,7 +101,5 @@ const login = async (event) => {
         />
       </router-link>
     </footer>
-
-    <Toast ref="toast" :toast-data="toastData" />
   </div>
 </template>

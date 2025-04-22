@@ -3,18 +3,19 @@ import { reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useAuth } from '@/use/useAuth';
+import { useToast } from '@/use/useToast';
 
 import Heading from '@/components/Heading.vue';
 import Text from '@/components/Text.vue';
 import TextInput from '@/components/TextInput.vue';
 import Button from '@/components/Button.vue';
 import GoogleButton from '@/components/GoogleButton.vue';
-import Toast from '@/components/Toast.vue';
 import Loader from '@/components/Loader.vue';
 
 const router = useRouter();
 const userStore = useUserStore();
-const { isLoading, toast, toastData, signUp } = useAuth();
+const { isLoading, signUp } = useAuth();
+const { showToast } = useToast();
 
 const formData = reactive({
   name: '',
@@ -40,6 +41,7 @@ const register = async (event) => {
     router.push('/');
   } catch (error) {
     console.log('Error: ', error);
+    showToast('error', 'Não foi possível concluir o cadastro. Tente novamente mais tarde.');
   }
 };
 </script>
@@ -122,7 +124,5 @@ const register = async (event) => {
         />
       </router-link>
     </footer>
-
-    <Toast ref="toast" :toast-data="toastData" />
   </div>
 </template>
