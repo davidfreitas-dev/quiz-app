@@ -49,38 +49,36 @@ export const useQuizStore = defineStore('quiz', () => {
   };
 
   const fetchUsersAndResults = async () => {
-    await withLoading(async () => {
-      const usersSnapshot = await getDocs(collection(db, 'users'));
+    const usersSnapshot = await getDocs(collection(db, 'users'));
   
-      const users = usersSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        score: 0,
-        results: []
-      }));
+    const users = usersSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      score: 0,
+      results: []
+    }));
       
-      await Promise.all(
-        users.map(async user => {
-          const snapshot = await getDocs(collection(db, `users/${user.id}/results`));
+    await Promise.all(
+      users.map(async user => {
+        const snapshot = await getDocs(collection(db, `users/${user.id}/results`));
   
-          const results = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }));
+        const results = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
   
-          user.score = results.reduce((total, r) => total + (r.score || 0), 0);
+        user.score = results.reduce((total, r) => total + (r.score || 0), 0);
           
-          user.results = results;
-        })
-      );
+        user.results = results;
+      })
+    );
   
-      usersResults.value = users
-        .map(user => ({
-          ...user,
-          image: user.image || new URL('@/assets/user.png', import.meta.url).href
-        }))
-        .sort((a, b) => b.score - a.score);
-    });
+    usersResults.value = users
+      .map(user => ({
+        ...user,
+        image: user.image || new URL('@/assets/user.png', import.meta.url).href
+      }))
+      .sort((a, b) => b.score - a.score);
   };
   
   const fetchQuizzes = async () => {

@@ -2,6 +2,10 @@
 import { computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useQuizStore } from '@/stores/quiz';
+import { useLoading } from '@/use/useLoading';
+
+// UI comnponents
+import PageLoader from '@/components/PageLoader.vue';
 import NavBar from '@/components/NavBar.vue';
 import Podium from '@/components/Podium.vue';
 import Avatar from '@/components/Avatar.vue';
@@ -9,7 +13,7 @@ import Container from '@/components/Container.vue';
 
 const quizStore = useQuizStore();
 
-const { usersResults, isLoading } = storeToRefs(quizStore);
+const { usersResults } = storeToRefs(quizStore);
 
 const topThree = computed(() => {
   return Array.isArray(usersResults.value)
@@ -36,13 +40,18 @@ const splitUserName =(name) => {
   return name.split(' ')[0];
 };
 
+const { isLoading, withLoading } = useLoading();
+
 onMounted(async () => {
-  await quizStore.fetchUsersAndResults();
+  await withLoading(async () => {
+    await quizStore.fetchUsersAndResults();
+  });
 });
 </script>
 
 <template>
-  <div class="flex flex-col h-screen">
+  <PageLoader :visible="isLoading" />
+  <div v-if="!isLoading" class="flex flex-col h-screen">
     <NavBar route="/" class="bg-primary" />
     <Podium :top-three="topThree" :split-user-name="splitUserName" />
     <Container class="flex-1 overflow-y-auto bg-light">
@@ -63,7 +72,6 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-        <!-- <span class="font-bold text-sm">{{ user.score }} pts</span> -->
       </div>
     </Container>
   </div>
