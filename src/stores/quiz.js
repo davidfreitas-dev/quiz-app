@@ -15,18 +15,6 @@ export const useQuizStore = defineStore('quiz', () => {
 
   const { user } = storeToRefs(userStore);
 
-  const withLoading = async (fn) => {
-    isLoading.value = true;
-    try {
-      return await fn();
-    } catch (err) {
-      console.error('Erro na requisição:', err);
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
   const getCollectionDocs = async (path) => {
     const snapshot = await getDocs(collection(db, path));
     return snapshot.docs.map(doc => ({ 
@@ -164,31 +152,27 @@ export const useQuizStore = defineStore('quiz', () => {
   };  
 
   const saveQuiz = async (quizData) => {
-    await withLoading(async () => {
-      await addDoc(collection(db, 'quizzes'), quizData);
-    });
+    await addDoc(collection(db, 'quizzes'), quizData);
   };
 
   const submitQuizResult = async ({ quizId, answers, score }) => {
-    await withLoading(async () => {
-      await userStore.fetchUser();
+    await userStore.fetchUser();
       
-      const userRef = doc(db, 'users', user.value.id);
-      const resultRef = doc(collection(userRef, 'results'));
+    const userRef = doc(db, 'users', user.value.id);
+    const resultRef = doc(collection(userRef, 'results'));
 
-      await setDoc(resultRef, {
-        idquiz: quizId,
-        iduser: user.value.id,
-        score
-      });
-  
-      for (const answer of answers) {
-        await setDoc(doc(collection(resultRef, 'answers'), String(answer.id)), {
-          idquestion: answer.id,
-          option: answer.option
-        });
-      }
+    await setDoc(resultRef, {
+      idquiz: quizId,
+      iduser: user.value.id,
+      score
     });
+  
+    for (const answer of answers) {
+      await setDoc(doc(collection(resultRef, 'answers'), String(answer.id)), {
+        idquestion: answer.id,
+        option: answer.option
+      });
+    }
   };
 
   return {
@@ -202,6 +186,7 @@ export const useQuizStore = defineStore('quiz', () => {
     fetchUsersAndResults,
     fetchQuizzes,
     fetchQuizById,
+    fetchQuizResult,
     saveQuiz,
     submitQuizResult
   };

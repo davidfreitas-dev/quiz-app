@@ -119,21 +119,22 @@ export function useQuiz() {
   };
 
   const finishQuiz = async () => {
-    try {
-      selectOptionByValue(getCurrentSelectedOption());
-      evaluateAnswers();
+    selectOptionByValue(getCurrentSelectedOption());
+    
+    evaluateAnswers();
+
+    await withLoading(
+      async () => {
+        await submitQuizResult({
+          quizId: quiz.value.id,
+          answers: userAnswers.value,
+          score: score.value,
+        });
+      },
+      'Erro ao submeter o quiz. Tente novamente mais tarde.'
+    );
   
-      await submitQuizResult({
-        quizId: quiz.value.id,
-        answers: userAnswers.value,
-        score: score.value,
-      });
-  
-      router.push(`/result/${quiz.value.id}`);
-    } catch (error) {
-      showToast('error', 'Erro ao finalizar o quiz. Tente novamente mais tarde.');
-      console.error(error);
-    }
+    router.push(`/result/${quiz.value.id}`);
   };  
 
   const computeOptionClass = (option, checked) => {

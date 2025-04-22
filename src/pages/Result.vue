@@ -14,8 +14,8 @@ import PageLoader from '@/components/PageLoader.vue';
 const route = useRoute();
 const router = useRouter();
 const quizStore = useQuizStore();
-const { quizResult } = storeToRefs(quizStore);
 
+const quizResult = ref(null);
 const resultScore = ref(0);
 const rawPercentage = ref(0);
 const finalPercentage = ref(0);
@@ -61,20 +61,28 @@ const { isLoading, withLoading } = useLoading();
 
 const calculatePercentage = (score, total) => total > 0 ? Math.round((score / total) * 100) : 0;
 
-onMounted(async () => {
-  await withLoading(async () => {
-    await quizStore.fetchQuizResult(route.params.id);
-  });
-  
-  if (quizResult.value) {
-    finalPercentage.value = calculatePercentage(
-      quizResult.value.score, 
-      quizResult.value.answers.length
-    );
 
-    animateNumber(rawPercentage, finalPercentage.value);
-    animateNumber(resultScore, quizResult.value.score);
-  }
+const loadData = async () => {
+  quizResult.value = await quizStore.fetchQuizResult(route.params.id);
+
+  if (!quizResult.value) return;
+
+  finalPercentage.value = calculatePercentage(
+    quizResult.value.score, 
+    quizResult.value.answers.length
+  );
+
+  animateNumber(rawPercentage, finalPercentage.value);
+  animateNumber(resultScore, quizResult.value.score);
+};
+
+onMounted(async () => {
+  await withLoading(
+    async () => {
+      loadData();
+    }, 
+    'Não foi possível carregar o resultado do quiz. Tente novamente mais tarde.'
+  );
 });
 </script>
 
