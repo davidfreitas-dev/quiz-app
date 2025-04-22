@@ -51,9 +51,16 @@ onMounted(async () => {
 
 <template>
   <PageLoader :visible="isLoading" />
+
   <div v-if="!isLoading" class="flex flex-col h-screen">
-    <NavBar route="/" class="bg-primary" />
+    <NavBar
+      title="Ranking"
+      route="/"
+      class="bg-primary"
+    />
+
     <Podium :top-three="topThree" :split-user-name="splitUserName" />
+    
     <Container class="flex-1 overflow-y-auto bg-light">
       <div
         v-for="(user, index) in others"

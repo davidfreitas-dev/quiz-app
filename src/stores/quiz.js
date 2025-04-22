@@ -8,7 +8,6 @@ export const useQuizStore = defineStore('quiz', () => {
   const quiz = ref(null);
   const quizzes = ref([]);
   const usersResults = ref([]);
-  const isQuizDone = ref(false);
   const isLoading = ref(true);
 
   const userStore = useUserStore();
@@ -181,7 +180,6 @@ export const useQuizStore = defineStore('quiz', () => {
     quizzes,
     usersResults,
     isLoading,
-    isQuizDone,
     getUserResults,
     fetchUsersAndResults,
     fetchQuizzes,

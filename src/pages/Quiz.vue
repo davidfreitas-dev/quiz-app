@@ -2,6 +2,7 @@
 import { onMounted } from 'vue';
 import { useQuiz } from '@/use/useQuiz';
 import { RadioGroup, RadioGroupLabel, RadioGroupOption, } from '@headlessui/vue';
+import NavBar from '@/components/NavBar.vue';
 import Container from '@/components/Container.vue';
 import QuizHeader from '@/components/QuizHeader.vue';
 import QuestionOption from '@/components/QuestionOption.vue';
@@ -10,7 +11,6 @@ import PageLoader from '@/components/PageLoader.vue';
 
 const {
   quiz,
-  isQuizDone,
   isLoading,
   currentQuestionIndex,
   currentQuestion,
@@ -30,9 +30,16 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Container>
-    <PageLoader :visible="isLoading" />
+  <PageLoader :visible="isLoading" />
+    
+  <NavBar
+    v-if="!isLoading"
+    :title="quiz?.description"
+    route="/"
+    class="bg-primary"
+  />
 
+  <Container>
     <div v-if="!isLoading && quiz" class="quiz-container flex flex-col items-start w-full">
       <QuizHeader
         v-if="currentQuestion"
@@ -62,7 +69,7 @@ onMounted(async () => {
           <QuestionOption
             :option="option"
             :checked="checked"
-            :show-result-icons="isQuizDone"
+            :show-result-icons="quiz.done"
             :correct-answer="currentQuestion.answer"
             :get-option-class="computeOptionClass"
           />

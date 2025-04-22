@@ -32,7 +32,7 @@ const props = defineProps({
     <Text
       size="sm"
       weight="semibold"
-      :text="`Prova ${quizId} - Questão ${questionId} de ${totalQuestions}`"
+      :text="`Questão ${questionId} de ${totalQuestions}`"
     />
     <Progressbar
       class="my-5"

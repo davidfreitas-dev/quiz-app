@@ -7,6 +7,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  title: {
+    type: String,
+    default: 'Title',
+  },
   route: {
     type: String,
     default: '',
@@ -23,7 +27,7 @@ const props = defineProps({
     />
     <Heading
       size="lg"
-      text="Ranking"
+      :text="title"
       class="text-white"
     />
   </nav>
