@@ -33,7 +33,7 @@ const login = async (event) => {
 </script>
 
 <template>
-  <div class="flex flex-col items-center w-full min-h-screen text-dark p-7">
+  <div class="flex flex-col items-center md:justify-center mx-auto max-w-[450px] min-h-screen text-dark p-7">
     <header class="flex flex-col items-start w-full">
       <Heading
         size="lg"
@@ -85,20 +85,12 @@ const login = async (event) => {
     </form>
 
     <footer class="flex flex-col items-center gap-4 my-8 min-w-full">
-      <router-link to="/forgot">
-        <Text
-          size="sm"
-          text="Esqueceu sua senha?"
-          class="text-primary cursor-pointer text-brand-hover underline"
-        />
+      <router-link to="/forgot" class="text-primary cursor-pointer text-sm underline underline-offset-4">
+        Esqueci minha senha
       </router-link>
 
-      <router-link to="/signup">
-        <Text
-          size="sm"
-          text="Criar conta"
-          class="text-primary cursor-pointer text-brand-hover underline"
-        />
+      <router-link to="/signup" class="text-primary cursor-pointer text-sm underline underline-offset-4">
+        Criar conta
       </router-link>
     </footer>
   </div>

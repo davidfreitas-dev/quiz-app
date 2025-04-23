@@ -30,7 +30,7 @@ const requestPasswordReset = async (event) => {
 </script>
 
 <template>
-  <div class="flex flex-col items-center w-full min-h-screen text-dark p-7">
+  <div class="flex flex-col items-center md:justify-center mx-auto max-w-[450px] min-h-screen text-dark p-7">
     <header class="flex flex-col items-start w-full">
       <Heading
         size="lg"
@@ -67,12 +67,8 @@ const requestPasswordReset = async (event) => {
     </form>
 
     <footer class="flex flex-col items-center gap-4 mt-8">
-      <router-link to="/signin">
-        <Text
-          size="sm"
-          text="Acessar minha conta"
-          class="text-primary cursor-pointer text-brand-hover underline"
-        />
+      <router-link to="/signin" class="text-primary cursor-pointer text-sm underline underline-offset-4">
+        Acessar minha conta
       </router-link>
     </footer>
   </div>
