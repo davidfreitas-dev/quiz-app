@@ -76,7 +76,7 @@ onMounted(setupHome);
 <template>
   <Header :user="user">
     <template #user-stats>
-      <div class="flex justify-between items-start bg-white text-gray-800 shadow-lg p-5 w-full rounded-2xl">
+      <div class="flex justify-between items-start bg-white text-gray-800 shadow-lg p-5 max-w-[635px] mx-auto rounded-2xl">
         <div>
           <h3 class="text-lg font-bold">
             Média geral

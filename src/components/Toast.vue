@@ -1,11 +1,12 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { TransitionRoot } from '@headlessui/vue';
+import { CheckCircleIcon, ExclamationCircleIcon, InformationCircleIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
   toastData: {
     type: Object,
-    default: () => {}
+    default: () => ({})
   }
 });
 
@@ -23,7 +24,20 @@ watch(isShowing, (newIsShowing) => {
   }
 });
 
-defineExpose({showToast});
+defineExpose({ showToast });
+
+// Computa o ícone com base no tipo
+const ToastIcon = computed(() => {
+  switch (props.toastData.type) {
+  case 'success':
+    return CheckCircleIcon;
+  case 'error':
+    return ExclamationCircleIcon;
+  case 'info':
+  default:
+    return InformationCircleIcon;
+  }
+});
 </script>    
 
 <template>
@@ -37,14 +51,19 @@ defineExpose({showToast});
     leave-to="opacity-0"
   >
     <div
-      id="toast"      
+      id="toast"
       role="alert"
       class="toast"
-      :class="{ 
-        'bg-success text-white': props.toastData.type === 'success', 
-        'bg-red-400 text-white': props.toastData.type === 'error' 
+      :class="{
+        'bg-success text-white': props.toastData.type === 'success',
+        'bg-red-400 text-white': props.toastData.type === 'error',
+        'bg-yellow-400 text-white': props.toastData.type === 'info'
       }"
     >
+      <!-- Ícone -->
+      <component :is="ToastIcon" class="w-5 h-5" />
+
+      <!-- Mensagem -->
       <div class="toast-content">
         {{ props.toastData.message }}
       </div>
@@ -54,9 +73,9 @@ defineExpose({showToast});
   
 <style scoped>
 .toast {
-  @apply fixed top-5 -translate-x-1/2 left-1/2 flex items-center p-4 mb-4 w-[90%] rounded-lg shadow-md
+  @apply fixed top-5 -translate-x-1/2 left-1/2 flex items-center p-4 mb-4 w-[90%] max-w-sm rounded-lg shadow-md gap-2;
 }
 .toast-content {
-  @apply ml-3 font-normal text-sm
+  @apply font-normal text-sm;
 }
 </style>

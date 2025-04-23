@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { storeToRefs } from 'pinia';
 import { useQuizStore } from '@/stores/quiz';
 import { useLoading } from '@/use/useLoading';
 
@@ -96,7 +95,7 @@ onMounted(async () => {
       :force="0.6"
       :particle-count="200"
       :colors="['#7b63dd', '#61cdb9', '#facc15', '#f87171']"
-      class="absolute top-0 left-0 w-full h-full z-10"
+      class="fixed top-0 left-1/2 w-full h-full z-10"
     />
 
     <div v-if="quizResult" class="flex flex-col items-center justify-center mt-20 gap-6 text-center px-4">

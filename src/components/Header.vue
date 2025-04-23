@@ -15,8 +15,8 @@ const userName = computed(() => {
 </script>
 
 <template>
-  <div class="relative w-full">
-    <div class="bg-primary text-white p-5 pb-[70px] mb-5 flex justify-between items-center">
+  <div class="relative w-full bg-primary text-white ">
+    <div class="max-w-2xl p-5 pb-[70px] mb-5 mx-auto flex justify-between items-center">
       <div class="flex flex-col">
         <h1 class="text-2xl font-bold mt-1 leading-1">
           Olá, {{ userName }}! 👋 

@@ -19,16 +19,18 @@ const props = defineProps({
 </script>
 
 <template>
-  <nav class="relative flex items-center justify-center p-5">
-    <BackButton
-      v-if="showBackButton"
-      :route="route"
-      class="absolute left-0 px-5"
-    />
-    <Heading
-      size="lg"
-      :text="title"
-      class="text-white"
-    />
+  <nav class="relative flex justify-center p-5">
+    <div class="w-full max-w-2xl relative flex items-center">
+      <BackButton
+        v-if="showBackButton"
+        :route="route"
+        class="absolute left-0 md:px-5"
+      />
+      <Heading
+        size="lg"
+        :text="title"
+        class="text-white mx-auto"
+      />
+    </div>
   </nav>
 </template>
