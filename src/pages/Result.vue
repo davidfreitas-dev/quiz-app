@@ -86,67 +86,69 @@ onMounted(async () => {
 </script>
 
 <template>
-  <PageLoader :visible="isLoading" />
+  <div>
+    <PageLoader :visible="isLoading" />
   
-  <Container v-if="!isLoading">
-    <ConfettiExplosion
-      v-if="showConfetti"
-      :stage-width="1200"
-      :force="0.6"
-      :particle-count="200"
-      :colors="['#7b63dd', '#61cdb9', '#facc15', '#f87171']"
-      class="fixed top-0 left-1/2 w-full h-full z-10"
-    />
+    <Container v-if="!isLoading">
+      <ConfettiExplosion
+        v-if="showConfetti"
+        :stage-width="1200"
+        :force="0.6"
+        :particle-count="200"
+        :colors="['#7b63dd', '#61cdb9', '#facc15', '#f87171']"
+        class="fixed top-0 left-1/2 w-full h-full z-10"
+      />
 
-    <div v-if="quizResult" class="flex flex-col items-center justify-center mt-20 gap-6 text-center px-4">
-      <div class="relative w-32 h-32">
-        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-          <circle
-            cx="50"
-            cy="50"
-            r="45"
-            stroke="#E5E7EB"
-            stroke-width="10"
-            fill="none"
-          />
-          <circle
-            cx="50"
-            cy="50"
-            r="45"
-            stroke="#61cdb9"
-            stroke-width="10"
-            fill="none"
-            stroke-linecap="round"
-            :stroke-dasharray="282.74"
-            :stroke-dashoffset="282.74 - (282.74 * rawPercentage / 100)"
-          />
-        </svg>
-        <div class="absolute inset-0 flex flex-col items-center justify-center">
-          <div class="text-xl font-bold">
-            {{ rawPercentage }}%
-          </div>
-          <div class="text-sm text-gray-500">
-            {{ quizResult.score }} de {{ quizResult.answers.length }}
+      <div v-if="quizResult" class="flex flex-col items-center justify-center mt-20 gap-6 text-center px-4">
+        <div class="relative w-32 h-32">
+          <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+            <circle
+              cx="50"
+              cy="50"
+              r="45"
+              stroke="#E5E7EB"
+              stroke-width="10"
+              fill="none"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r="45"
+              stroke="#61cdb9"
+              stroke-width="10"
+              fill="none"
+              stroke-linecap="round"
+              :stroke-dasharray="282.74"
+              :stroke-dashoffset="282.74 - (282.74 * rawPercentage / 100)"
+            />
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <div class="text-xl font-bold">
+              {{ rawPercentage }}%
+            </div>
+            <div class="text-sm text-gray-500">
+              {{ quizResult.score }} de {{ quizResult.answers.length }}
+            </div>
           </div>
         </div>
-      </div>
       
-      <div class="bg-white text-success px-4 py-2 rounded-full shadow-lg border border-gray-100 text-sm font-bold">
-        +{{ resultScore }} XP
-      </div>
+        <div class="bg-white text-success px-4 py-2 rounded-full shadow-lg border border-gray-100 text-sm font-bold">
+          +{{ resultScore }} XP
+        </div>
       
-      <div class="message">
-        <h1 class="text-xl font-bold text-gray-800">
-          {{ resultTitle }}
-        </h1>
-        <p class="text-gray-600">
-          {{ resultMessage }}
-        </p>
-      </div>
+        <div class="message">
+          <h1 class="text-xl font-bold text-gray-800">
+            {{ resultTitle }}
+          </h1>
+          <p class="text-gray-600">
+            {{ resultMessage }}
+          </p>
+        </div>
       
-      <Button size="block" @click="router.push('/')">
-        Voltar ao início
-      </Button>
-    </div>
-  </Container>
+        <Button size="block" @click="router.push('/')">
+          Voltar ao início
+        </Button>
+      </div>
+    </Container>
+  </div>
 </template>

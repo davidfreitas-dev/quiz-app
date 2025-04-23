@@ -30,59 +30,61 @@ onMounted(async () => {
 </script>
 
 <template>
-  <PageLoader :visible="isLoading" />
+  <div>
+    <PageLoader :visible="isLoading" />
     
-  <NavBar
-    v-if="!isLoading"
-    :title="quiz?.description"
-    route="/"
-    class="bg-primary"
-  />
+    <NavBar
+      v-if="!isLoading"
+      :title="quiz?.description"
+      route="/"
+      class="bg-primary"
+    />
 
-  <Container>
-    <div v-if="!isLoading && quiz" class="quiz-container flex flex-col items-start w-full">
-      <QuizHeader
-        v-if="currentQuestion"
-        :quiz-id="quiz.id"
-        :question-id="currentQuestion?.id"
-        :total-questions="quiz.totalQuestions"
-        :question-text="currentQuestion.text"
-        :progress="progress"
-      />
+    <Container>
+      <div v-if="!isLoading && quiz" class="quiz-container flex flex-col items-start w-full">
+        <QuizHeader
+          v-if="currentQuestion"
+          :quiz-id="quiz.id"
+          :question-id="currentQuestion?.id"
+          :total-questions="quiz.totalQuestions"
+          :question-text="currentQuestion.text"
+          :progress="progress"
+        />
       
-      <RadioGroup
-        :model-value="getCurrentSelectedOption()"
-        @update:model-value="selectOptionByValue"
-        class="flex flex-1 flex-col items-start w-full gap-3 mb-3"
-      >
-        <RadioGroupLabel class="sr-only">
-          Escolha uma opção
-        </RadioGroupLabel>
-
-        <RadioGroupOption
-          v-for="(option, index) in currentQuestion.options"
-          :key="index"
-          :value="option.option"
-          v-slot="{ checked }"
-          as="template"
+        <RadioGroup
+          :model-value="getCurrentSelectedOption()"
+          @update:model-value="selectOptionByValue"
+          class="flex flex-1 flex-col items-start w-full gap-3 mb-3"
         >
-          <QuestionOption
-            :option="option"
-            :checked="checked"
-            :show-result-icons="quiz.done"
-            :correct-answer="currentQuestion.answer"
-            :get-option-class="computeOptionClass"
-          />
-        </RadioGroupOption>
-      </RadioGroup>
+          <RadioGroupLabel class="sr-only">
+            Escolha uma opção
+          </RadioGroupLabel>
 
-      <NavActions
-        class="mt-5"
-        :text-left="currentQuestionIndex === 0 ? 'Voltar' : 'Anterior'"
-        :text-right="isLastQuestion ? 'Finalizar' : 'Próxima'"
-        @on-handle-left="goToPreviousQuestion"
-        @on-handle-right="goToNextQuestion"
-      />
-    </div>
-  </Container>
+          <RadioGroupOption
+            v-for="(option, index) in currentQuestion.options"
+            :key="index"
+            :value="option.option"
+            v-slot="{ checked }"
+            as="template"
+          >
+            <QuestionOption
+              :option="option"
+              :checked="checked"
+              :show-result-icons="quiz.done"
+              :correct-answer="currentQuestion.answer"
+              :get-option-class="computeOptionClass"
+            />
+          </RadioGroupOption>
+        </RadioGroup>
+
+        <NavActions
+          class="mt-5"
+          :text-left="currentQuestionIndex === 0 ? 'Voltar' : 'Anterior'"
+          :text-right="isLastQuestion ? 'Finalizar' : 'Próxima'"
+          @on-handle-left="goToPreviousQuestion"
+          @on-handle-right="goToNextQuestion"
+        />
+      </div>
+    </Container>
+  </div>
 </template>

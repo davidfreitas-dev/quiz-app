@@ -119,8 +119,6 @@ export const useQuizStore = defineStore('quiz', () => {
       questions,
       done: !!quizResult
     };
-
-    console.log('Quiz Data: ', quiz.value);
   };    
 
   const fetchQuizResult = async (quizId) => {

@@ -50,36 +50,38 @@ onMounted(async () => {
 </script>
 
 <template>
-  <PageLoader :visible="isLoading" />
+  <div>
+    <PageLoader :visible="isLoading" />
 
-  <div v-if="!isLoading" class="flex flex-col h-screen">
-    <NavBar
-      title="Ranking"
-      route="/"
-      class="bg-primary"
-    />
+    <div v-if="!isLoading" class="flex flex-col h-screen">
+      <NavBar
+        title="Ranking"
+        route="/"
+        class="bg-primary"
+      />
 
-    <Podium :top-three="topThree" :split-user-name="splitUserName" />
+      <Podium :top-three="topThree" :split-user-name="splitUserName" />
     
-    <Container class="flex-1 overflow-y-auto bg-light">
-      <div
-        v-for="(user, index) in others"
-        :key="user.id"
-        class="flex items-center justify-between bg-white rounded-xl shadow-lg py-4 px-5 mb-3"
-      >
-        <div class="flex items-center gap-5">
-          <span class="font-medium text-gray-500">{{ index + 4 }}</span>
-          <Avatar :image="user?.image" class="w-10 h-10" />
-          <div class="">
-            <div class="text-sm font-semibold leading-6">
-              {{ user.name }}
-            </div>
-            <div class="text-xs text-gray-400">
-              {{ user.score }} pontos
+      <Container class="flex-1 overflow-y-auto bg-light">
+        <div
+          v-for="(user, index) in others"
+          :key="user.id"
+          class="flex items-center justify-between bg-white rounded-xl shadow-lg py-4 px-5 mb-3"
+        >
+          <div class="flex items-center gap-5">
+            <span class="font-medium text-gray-500">{{ index + 4 }}</span>
+            <Avatar :image="user?.image" class="w-10 h-10" />
+            <div class="">
+              <div class="text-sm font-semibold leading-6">
+                {{ user.name }}
+              </div>
+              <div class="text-xs text-gray-400">
+                {{ user.score }} pontos
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </Container>
+      </Container>
+    </div>
   </div>
 </template>

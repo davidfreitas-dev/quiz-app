@@ -61,50 +61,52 @@ onMounted(loadData);
 </script>
 
 <template>
-  <PageLoader :visible="isLoading" />
+  <div>
+    <PageLoader :visible="isLoading" />
     
-  <div class="bg-primary text-white relative w-full">
-    <div class="p-5 h-[146px] max-w-2xl mx-auto flex justify-between items-start">
-      <div class="flex items-center justify-between w-full">
-        <BackButton route="/" />
-        <Heading
-          size="lg"
-          text="Perfil"
-          class="text-white"
-        />
-        <div class="w-6" />
+    <div class="bg-primary text-white relative w-full">
+      <div class="p-5 h-[146px] max-w-2xl mx-auto flex justify-between items-start">
+        <div class="flex items-center justify-between w-full">
+          <BackButton route="/" />
+          <Heading
+            size="lg"
+            text="Perfil"
+            class="text-white"
+          />
+          <div class="w-6" />
+        </div>
       </div>
-    </div>
         
-    <div class="absolute left-1/2 -bottom-[180px] transform -translate-x-1/2 w-[90%]">
-      <div class="relative flex flex-col items-center max-w-[635px] mx-auto gap-3 bg-white shadow-lg p-5 rounded-xl pt-12">
-        <div class="absolute -top-12 left-1/2 transform -translate-x-1/2">
-          <Avatar :image="user?.image" class="w-20 h-20 rounded-full" />
+      <div class="absolute left-1/2 -bottom-[180px] transform -translate-x-1/2 w-[90%]">
+        <div class="relative flex flex-col items-center max-w-[635px] mx-auto gap-3 bg-white shadow-lg p-5 rounded-xl pt-12">
+          <div class="absolute -top-12 left-1/2 transform -translate-x-1/2">
+            <Avatar :image="user?.image" class="w-20 h-20 rounded-full" />
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="font-bold text-lg text-dark">{{ user?.name }}</span>
+            <span class="text-sm text-secondary">{{ user?.email }}</span>
+          </div>
+          <UserStats
+            :quizzes="totalQuizzes"
+            :points="totalPoints"
+            :ranking="userRanking"
+          />
         </div>
-        <div class="flex flex-col items-center">
-          <span class="font-bold text-lg text-dark">{{ user?.name }}</span>
-          <span class="text-sm text-secondary">{{ user?.email }}</span>
-        </div>
-        <UserStats
-          :quizzes="totalQuizzes"
-          :points="totalPoints"
-          :ranking="userRanking"
-        />
       </div>
     </div>
+
+    <Container class="mt-48">
+      <Button size="block" @click="showModal">
+        Encerrar Sessão
+        <ArrowRightOnRectangleIcon class="h-5 w-5 ml-3" />
+      </Button>
+    </Container>
+
+    <Modal ref="modalRef" @on-modal-confirm="signOut">
+      <template #icon>
+        <ExclamationTriangleIcon class="h-8 w-8 text-yellow-400" />
+      </template>  
+      Deseja realmente sair e finalizar a sessão?
+    </Modal>
   </div>
-
-  <Container class="mt-48">
-    <Button size="block" @click="showModal">
-      Encerrar Sessão
-      <ArrowRightOnRectangleIcon class="h-5 w-5 ml-3" />
-    </Button>
-  </Container>
-
-  <Modal ref="modalRef" @on-modal-confirm="signOut">
-    <template #icon>
-      <ExclamationTriangleIcon class="h-8 w-8 text-yellow-400" />
-    </template>  
-    Deseja realmente sair e finalizar a sessão?
-  </Modal>
 </template>

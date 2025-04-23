@@ -74,54 +74,56 @@ onMounted(setupHome);
 </script>
 
 <template>
-  <Header :user="user">
-    <template #user-stats>
-      <div class="flex justify-between items-start bg-white text-gray-800 shadow-lg p-5 max-w-[635px] mx-auto rounded-2xl">
-        <div>
-          <h3 class="text-lg font-bold">
-            Média geral
-          </h3>
-          <span class="text-sm text-secondary">
-            {{ scoreSummary.completedQuizzes }} 
-            {{ scoreSummary.completedQuizzes === 1 ? 'prova concluída' : 'provas concluídas' }}
-          </span>
+  <div>
+    <PageLoader :visible="isLoading" />
+
+    <Header :user="user">
+      <template #user-stats>
+        <div class="flex justify-between items-start bg-white text-gray-800 shadow-lg p-5 max-w-[635px] mx-auto rounded-2xl">
+          <div>
+            <h3 class="text-lg font-bold">
+              Média geral
+            </h3>
+            <span class="text-sm text-secondary">
+              {{ scoreSummary.completedQuizzes }} 
+              {{ scoreSummary.completedQuizzes === 1 ? 'prova concluída' : 'provas concluídas' }}
+            </span>
+          </div>
+          <ProgressCircle :percentage="scoreSummary.percentage" :value="scoreSummary.average" />
         </div>
-        <ProgressCircle :percentage="scoreSummary.percentage" :value="scoreSummary.average" />
-      </div>
-    </template>
-  </Header>
+      </template>
+    </Header>
 
-  <PageLoader :visible="isLoading" />
-
-  <Container v-if="!isLoading">
-    <Text
-      v-if="!quizzes.length"
-      class="mx-auto my-7"
-      text="Nenhum quizz disponível ainda :("
-      size="md"
-    />
-
-    <div v-else class="quizzes flex flex-1 flex-col items-start w-full gap-5 my-7">
+    <Container v-if="!isLoading">
       <Text
-        class="leading-6 text-gray-900 mb-3"
+        v-if="!quizzes.length"
+        class="mx-auto my-7"
+        text="Nenhum quizz disponível ainda :("
         size="md"
-        weight="bold"
-        text="Questionários"
       />
 
-      <QuizCard
-        v-for="(quiz, index) in quizzes"
-        :key="index"
-        :quiz="quiz"
-      />
-    </div>
+      <div v-else class="quizzes flex flex-1 flex-col items-start w-full gap-5 my-7">
+        <Text
+          class="leading-6 text-gray-900 mb-3"
+          size="md"
+          weight="bold"
+          text="Questionários"
+        />
 
-    <Button
-      size="block"
-      @click="router.push('/ranking')"
-    >
-      Ranking
-    </Button>
-  </Container>
+        <QuizCard
+          v-for="(quiz, index) in quizzes"
+          :key="index"
+          :quiz="quiz"
+        />
+      </div>
+
+      <Button
+        size="block"
+        @click="router.push('/ranking')"
+      >
+        Ranking
+      </Button>
+    </Container>
+  </div>
 </template>
 
