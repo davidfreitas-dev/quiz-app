@@ -14,6 +14,7 @@ export function useAuth() {
     try {
       return await fn();
     } catch (err) {
+      console.log(err.message);
       handleException(err.code);
       showToast('error', exception.value);
     } finally {
@@ -21,8 +22,14 @@ export function useAuth() {
     }
   };
 
-  const signIn = async ({ email, password }) => {
+  const getAuthInstance = () => {
     const auth = getAuth();
+    auth.languageCode = 'pt-BR';
+    return auth;
+  };  
+
+  const signIn = async ({ email, password }) => {
+    const auth = getAuthInstance();
 
     return withLoading(async () => {
       await signInWithEmailAndPassword(auth, email, password);
@@ -35,7 +42,7 @@ export function useAuth() {
   };
 
   const signUp = async ({ email, password }) => {
-    const auth = getAuth();
+    const auth = getAuthInstance();
 
     return withLoading(async () => {
       await createUserWithEmailAndPassword(auth, email, password);
@@ -48,7 +55,7 @@ export function useAuth() {
   };
 
   const passwordReset = async (email) => {
-    const auth = getAuth();
+    const auth = getAuthInstance();
 
     return withLoading(async () => {
       await sendPasswordResetEmail(auth, email);
@@ -60,7 +67,7 @@ export function useAuth() {
   };
 
   const logOut = async () => {
-    const auth = getAuth();
+    const auth = getAuthInstance();
 
     return withLoading(async () => {
       await signOut(auth);
@@ -72,7 +79,7 @@ export function useAuth() {
   };
 
   const signInWithGoogle = async () => {
-    const auth = getAuth();
+    const auth = getAuthInstance();
     const provider = new GoogleAuthProvider();
 
     return withLoading(async () => {

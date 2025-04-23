@@ -1,50 +1,24 @@
 import { ref } from 'vue';
 
+const errorMessages = {
+  'auth/invalid-login-credentials': 'Credenciais de login inválidas.',
+  'auth/invalid-email': 'E-mail inválido.',
+  'auth/email-already-in-use': 'Este e-mail já foi utilizado por outro usuário.',
+  'auth/user-not-found': 'Nenhuma conta encontrada para este e-mail.',
+  'auth/too-many-requests': 'Conta bloqueada por excesso de tentativas.',
+  'auth/wrong-password': 'Senha incorreta.',
+  'auth/weak-password': 'Sua senha deve possuir no mínimo 6 caracteres.',
+  'auth/user-disabled': 'Conta inativa.',
+  'auth/internal-error': 'Erro interno. Contate o administrador do sistema.',
+  'auth/popup-closed-by-user': 'O pop-up foi fechado antes da conclusão.',
+  'auth/network-request-failed': 'Falha na conexão. Verifique sua internet.'
+};
+
 export function useException() {
   const exception = ref('');
 
-  const handleException = (errCode) => {
-    switch (errCode) {
-    case 'auth/invalid-login-credentials':
-      exception.value = 'Credenciais de login inválidas.';
-      break;
-
-    case 'auth/invalid-email':
-      exception.value = 'E-mail inválido.';
-      break;
-
-    case 'auth/email-already-in-use':
-      exception.value = 'Este e-mail já foi utilizado por outro usuário.';
-      break;
-
-    case 'auth/user-not-found':
-      exception.value = 'Nenhuma conta encontrada para este e-mail.';
-      break;
-
-    case 'auth/too-many-requests':
-      exception.value = 'Conta bloqueada por excesso de tentativas.';
-      break;
-
-    case 'auth/wrong-password':
-      exception.value = 'Senha incorreta.';
-      break;
-
-    case 'auth/weak-password':
-      exception.value = 'Sua senha deve possuir no mínimo 6 caracteres.';
-      break;
-
-    case 'auth/user-disabled':
-      exception.value = 'Conta inativa.';
-      break;
-
-    case 'auth/internal-error':
-      exception.value = 'Erro interno. Contate o administrador do sistema.';
-      break;
-    
-    default:
-      exception.value = 'E-mail ou senha incorreta.';
-      break;
-    }
+  const handleException = (code) => {
+    exception.value = errorMessages[code] || 'Ocorreu um erro inesperado. Tente novamente.';
   };
 
   return {
