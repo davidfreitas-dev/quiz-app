@@ -62,7 +62,7 @@ const iconToShow = computed(() => {
 
 <template>
   <div :class="getOptionClass(option, checked)">
-    <div class="ml-2">
+    <div class="w-[90%] ml-2">
       <RadioGroupLabel class="text-sm font-semibold">
         {{ option.option }}. {{ option.desc }}
       </RadioGroupLabel>

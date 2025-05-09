@@ -149,7 +149,19 @@ export const useQuizStore = defineStore('quiz', () => {
   };  
 
   const saveQuiz = async (quizData) => {
-    await addDoc(collection(db, 'quizzes'), quizData);
+    const { questions, ...quizInfo } = quizData;
+
+    const quizRef = await addDoc(collection(db, 'quizzes'), quizInfo);
+
+    const questionsCollectionRef = collection(quizRef, 'questions');
+
+    const addQuestionPromises = questions.map((question) =>
+      addDoc(questionsCollectionRef, question)
+    );
+
+    await Promise.all(addQuestionPromises);
+
+    console.log('Quiz salvo com sucesso!');
   };
 
   const submitQuizResult = async ({ quizId, answers, score }) => {

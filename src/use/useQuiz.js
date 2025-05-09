@@ -139,7 +139,7 @@ export function useQuiz() {
 
   const computeOptionClass = (option, checked) => {
     const baseClass =
-      'flex justify-between items-center gap-2 px-3 w-full h-14 rounded-2xl shadow-sm transition-colors text-dark bg-light';
+      'flex justify-between items-center gap-2 px-3 py-2 w-full rounded-2xl shadow-sm transition-colors text-dark bg-light';
   
     const isCorrectAnswer =
       quiz.value?.done &&

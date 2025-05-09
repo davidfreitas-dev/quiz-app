@@ -45,8 +45,8 @@ onMounted(async () => {
         <QuizHeader
           v-if="currentQuestion"
           :quiz-id="quiz.id"
-          :question-id="currentQuestion?.id"
-          :total-questions="quiz.totalQuestions"
+          :question-id="currentQuestionIndex+1"
+          :total-questions="quiz.questions.length"
           :question-text="currentQuestion.text"
           :progress="progress"
         />
